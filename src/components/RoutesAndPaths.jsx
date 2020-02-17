@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Link, Route, BrowserRouter, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
+import CourseShelf from "./CourseShelf.jsx";
+import Checkout from "./Checkout.jsx";
 
 class Routes extends Component {
   constructor() {
@@ -10,20 +12,23 @@ class Routes extends Component {
   renderBrowseMarket = () => {
     console.log("browseMarket");
     this.props.dispatch({ type: "BROWSE" });
-    return <ShopShelf />;
+    return <CourseShelf />;
   };
 
   renderLoginSignup = () => {
-    this.props.dispatch({
-      type: "SET-CURRENT-CONTAINER-TYPE",
-      payload: "cart"
-    });
     console.log("username is " + this.props.username);
     if (
       this.props.username === undefined ||
       this.props.username === "browsing ..."
     ) {
-      return <>hello</>;
+      return (
+        <>
+          <div>hello</div>
+          <div>
+            <Link to={"/shop"}>Shop</Link>
+          </div>
+        </>
+      );
     }
     return <></>;
   };
@@ -58,18 +63,14 @@ class Routes extends Component {
     return <Cart />;
   };
 
-  renderCheckout = () => {
+  renderCheckout = routerData => {
     console.log("running checkout");
-    return <Checkout />;
+    return <Checkout rD={routerData} />;
   };
 
-  renderShopShelf = () => {
+  renderCourseShelf = routerData => {
     console.log("render shop");
-    this.props.dispatch({
-      type: "SET-CURRENT-CONTAINER-TYPE",
-      payload: "cart"
-    });
-    return <ShopShelf />;
+    return <CourseShelf rD={routerData} />;
   };
 
   renderSalesPage = routerData => {
@@ -125,6 +126,8 @@ class Routes extends Component {
     return (
       <div>
         <Route exact={true} path="/" render={this.renderLoginSignup} />
+        <Route exact={true} path="/shop/" render={this.renderCourseShelf} />
+        <Route exact={true} path="/checkout" render={this.renderCheckout} />
         <Route exact={true} path="/cart/" render={this.renderCart} />
         <Route
           exact={true}
@@ -139,12 +142,7 @@ class Routes extends Component {
 const mapStateToProps = state => {
   return {
     loggedIn: state.loggedIn,
-    username: state.username,
-    cart: state.cart,
-    designsCart: state.designsCart,
-    sellerStatus: state.sellerStatus,
-    currentItemContainer: state.currentItemContainer,
-    shopDesigns: state.shopDesigns
+    username: state.username
   }; // THIS WILL CHANGE
 };
 

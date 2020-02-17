@@ -1,4 +1,5 @@
 let express = require("express");
+let router = express.Router();
 let app = express();
 let mongodb = require("mongodb");
 let MongoClient = mongodb.MongoClient;
@@ -13,6 +14,12 @@ reloadMagic(app);
 let sessions = {};
 let configJson = require("./config.json");
 let url = configJson.url;
+// STRIPE
+const bodyParser = require("body-parser");
+const postCharge = require("./src/stripey.js");
+require("dotenv").config();
+const port = process.env.PORT || 7000;
+app.use(bodyParser.json());
 
 app.use("/", express.static("build")); // Needed for the HTML and JS files
 app.use("/", express.static("public")); // Needed for local assets
@@ -24,7 +31,7 @@ let dbo = undefined;
 let url = "mongodb+srv://... see config.json (imported file)";
 */
 MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
-  dbo = db.db("alibay"); //
+  dbo = db.db("futureProofMe"); //
 });
 
 let generateId = () => {
@@ -32,6 +39,17 @@ let generateId = () => {
 };
 
 // Your endpoints go after this line
+//STRIPE
+router.post("/stripe/charge", postCharge);
+app.use("/api", router);
+app.use((_, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+}); // enable CORS for all requests
 
 app.post("/login", upload.none(), (req, res) => {
   console.log("login", req.body);
@@ -121,113 +139,10 @@ app.post("/logout", upload.none(), async (req, res) => {
   return res.send(JSON.stringify({ success: true }));
 });
 
-app.post("/become-seller", upload.none(), async (req, res) => {
-  let name = req.body.username;
+app.get("/all-courses", async (req, res) => {
+  console.log("request to /all-courses");
   dbo
-    .collection("users")
-    .updateOne({ username: name }, { $set: { sellerStatus: true } });
-
-  console.log("db updated");
-  return res.send(JSON.stringify({ success: true }));
-});
-
-app.post(
-  "/new-design",
-  upload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "instructions", maxCount: 1 }
-  ]),
-  async (req, res) => {
-    console.log("writing new-design to db");
-    let imgFile = req.files.image;
-    let instrFile = req.files.instructions && req.files.instructions; // defined only if exists
-    let imgFrontendPath = "/uploads/" + imgFile[0].filename;
-    let instrFrontendPath = instrFile
-      ? "/uploads/" + instrFile[0].filename
-      : "";
-
-    let instrFileType = instrFile ? instrFile[0].mimetype : ""; // not needed here, but good to know in case
-    console.log("up to HEREEEE now");
-    dbo.collection("designs").insertOne({
-      username: req.body.username,
-      description: req.body.description,
-      imgFrontendPath: imgFrontendPath,
-      instrFrontendPath: instrFrontendPath,
-      designParts: JSON.parse(req.body.designParts),
-      theme: req.body.theme,
-      size: req.body.size,
-      unitPrice: req.body.unitPrice,
-      completed: true
-    });
-
-    console.log("db updated");
-    return res.send(JSON.stringify({ success: true }));
-  }
-);
-app.post(
-  "/edit-design",
-  upload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "instructions", maxCount: 1 }
-  ]),
-
-  async (req, res) => {
-    console.log("writing new-design to db");
-    console.log(req.body);
-    let imgFrontendPath = "";
-    let instrFrontendPath = "";
-    if (req.files.image) {
-      // if a new file has been uploaded
-      let imgFile = req.files.image;
-      imgFrontendPath = "/uploads/" + imgFile[0].filename;
-    } else {
-      imgFrontendPath = req.body.formerImgFrontendPath;
-      console.log("imgFrontendPath is ", imgFrontendPath);
-    }
-    console.log("imgFrontendPath is ", imgFrontendPath);
-    //
-    if (req.files.instructions) {
-      // if a new file has been uploaded
-      let instrFile = req.files.instructions;
-      instrFrontendPath = "/uploads/" + instrFile[0].filename;
-    } else {
-      instrFrontendPath = req.body.formerInstrFrontendPath;
-    }
-    //let instrFileType = instrFile ? instrFile[0].mimetype : ""; // not needed here, but good to know in case
-    dbo.collection("designs").updateOne(
-      { _id: ObjectID(req.body._id) },
-      {
-        $set: {
-          username: req.body.username,
-          description: req.body.description,
-          theme: req.body.theme,
-          size: req.body.size,
-          unitPrice: req.body.unitPrice,
-          completed: true,
-          imgFrontendPath: imgFrontendPath,
-          instrFrontendPath: instrFrontendPath,
-          designParts: JSON.parse(req.body.designParts)
-        }
-      }
-    );
-    console.log("db updated");
-    return res.send(JSON.stringify({ success: true }));
-  }
-);
-
-app.post("/delete-design", upload.none(), async (req, res) => {
-  console.log("deleting design on db");
-  console.log(req.body);
-
-  dbo.collection("designs").remove({ _id: ObjectID(req.body._id) });
-  console.log("db updated for delete");
-  return res.send(JSON.stringify({ success: true }));
-});
-
-app.get("/all-items", async (req, res) => {
-  console.log("request to /all-items");
-  dbo
-    .collection("itemsForSale")
+    .collection("courses")
     .find({})
     .toArray((err, item) => {
       if (err) {
@@ -238,38 +153,6 @@ app.get("/all-items", async (req, res) => {
     });
 });
 
-app.get("/all-designs", async (req, res) => {
-  console.log("request to /all-designs");
-  dbo
-    .collection("designs")
-    .find({})
-    .toArray((err, design) => {
-      if (err) {
-        console.log("error", err);
-        return res.send(JSON.stringify({ success: false }));
-      }
-      res.send(JSON.stringify(design));
-    });
-});
-
-app.post("/new-part", upload.none(), async (req, res) => {
-  console.log("writing new-part to db");
-  dbo.collection("itemsForSale").insertOne({
-    dimensions: req.body.dimensions,
-    depth: req.body.depth,
-    color: req.body.color,
-    inStock: 10000,
-    unitPrice: req.body.unitPrice,
-    seller: "house",
-    imgPath: req.body.imgPath,
-    includesPlan: "false",
-    type: req.body.type
-  });
-
-  console.log("db updated");
-  return res.send(JSON.stringify({ success: true }));
-});
-
 // Your endpoints go before this line
 
 app.all("/*", (req, res, next) => {
@@ -277,6 +160,6 @@ app.all("/*", (req, res, next) => {
   res.sendFile(__dirname + "/build/index.html");
 });
 
-app.listen(4000, "0.0.0.0", () => {
-  console.log("Server running on port 4000");
+app.listen(port, "0.0.0.0", () => {
+  console.log("Server running on port " + port);
 });
