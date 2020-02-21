@@ -25,6 +25,7 @@ app.use("/", express.static("build")); // Needed for the HTML and JS files
 app.use("/", express.static("public")); // Needed for local assets
 app.use("/uploads", express.static("uploads"));
 app.use("/icons", express.static("icons"));
+app.use("/logos", express.static("logos"));
 
 let dbo = undefined;
 /*
@@ -60,16 +61,13 @@ app.post("/login", upload.none(), (req, res) => {
       console.log("/login error");
       return res.send(JSON.stringify({ success: false, msg: "db err" }));
     }
-    if (user === null || user === "browsing ...") {
-      // browser is reserved word
-      console.log("user doesn't exist");
+    if (user === null) {
+      console.log("user === null");
       return res.send(JSON.stringify({ success: false, msg: "user null" }));
     }
-    console.log(user.password);
     if (user.password === pwd) {
       console.log("login success");
       let sessionId = generateId();
-      console.log("generated id", sessionId);
       sessions[sessionId] = name;
       res.cookie("sid", sessionId);
       res.send(
@@ -78,8 +76,7 @@ app.post("/login", upload.none(), (req, res) => {
           cart: user.cart
         })
       );
-      console.log("loaded cart is ");
-      console.log(user);
+      console.log("success : ", user);
       return;
     }
   });
@@ -101,13 +98,10 @@ app.post("/signup", upload.none(), async (req, res) => {
     username: name,
     password: pwd,
     cart: [],
-    designsCart: [],
-    personalInventory: [],
-    sellerStatus: false
+    studentHistory: {}
   });
   console.log("signup success");
   let sessionId = generateId();
-  console.log("generated id", sessionId);
   sessions[sessionId] = name;
   res.cookie("sid", sessionId);
   return res.send(JSON.stringify({ success: true }));
@@ -118,19 +112,14 @@ app.post("/logout", upload.none(), async (req, res) => {
   //res.cookie("sid", 0); // this sets my cookie to zero, but doesn't actually delete it
   let name = req.body.username;
   let cart = JSON.parse(req.body.cart);
-  let designsCart = JSON.parse(req.body.designsCart);
-  let personalInventory = JSON.parse(req.body.personalInventory);
-  console.log("name and cart and personalInventory defined");
-  console.log(name);
-  console.log(cart);
-  console.log(personalInventory);
+  let studentHistory = JSON.parse(req.body.studentHistory);
+  // i think studentHistory should be updated at every meaningful entry ... too risky to wait for logoff
   dbo.collection("users").updateOne(
     { username: name },
     {
       $set: {
         cart: cart,
-        designsCart: designsCart,
-        personalInventory: personalInventory
+        studentHistory: studentHistory
       }
     }
   );

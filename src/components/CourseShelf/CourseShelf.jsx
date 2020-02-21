@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import CourseSearch from "./CourseSearch.jsx";
-import CourseSearchResults from "./CourseSearchResults.jsx";
+import CourseSearch from "../CourseSearch/CourseSearch.jsx";
+import CourseSearchResults from "../CourseSearchResults/CourseSearchResults.jsx";
 
 class CourseShelf extends Component {
   constructor(props) {
@@ -11,7 +11,7 @@ class CourseShelf extends Component {
     return (
       <>
         <CourseSearch />
-        <CourseSearchResults />
+        <CourseSearchResults rD={this.props.rD} />
       </>
     );
   };

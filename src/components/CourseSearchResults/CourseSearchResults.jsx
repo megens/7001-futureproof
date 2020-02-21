@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import Course from "./Course.jsx";
+import Course from "../Course/Course.jsx";
 
 class CourseSearchResults extends Component {
   constructor(props) {

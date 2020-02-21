@@ -1,21 +1,31 @@
+:root {
+  --main-bg-color: white;
+  --banner-bg-color: #32a852;
+  --left-col-size: 190px;
+}
+
 body {
-  background-color: #bbb;
-  margin: 0;
+  background: var(--main-bg-color);
   font-family: "Verdana", Geneva, sans-serif;
+  font-family: "Open", Sans, sans-serif;
 }
 
 button {
   margin-right: 5px;
 }
 
-#button-x {
-  position: absolute;
-  top: 8px;
-  right: 5px;
+#button-login {
+  background-color: orangered;
+  color: white;
+  border-radius: 8px;
+  border: 1px;
+  width: 120px;
+  height: 40px;
+  margin-right: 105px;
 }
 
 img {
-  margin-right: 5px;
+  margin-right: 0px;
 }
 .overlay {
   z-index: 50;
@@ -27,44 +37,86 @@ img {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.icons {
+  height: 100px;
+  display: flex;
+  float: right;
+  align-items: center;
+}
+.icons > img {
+  margin: 15px;
+}
+
 .popup {
   z-index: 100;
   position: fixed;
   top: 200px;
   left: 200px;
   right: 200px;
-  background-color: white;
+}
+
+.top-left {
+  display: flex;
+  flex-direction: row;
+  text-align: right;
+
+  background-color: #32a852;
+  width: 100%;
+  margin-bottom: 20px;
+
+  color: white;
+  font-size: x-large;
+}
+
+.top-left > div {
+  margin: 10px;
+  margin-left: 30px;
+}
+
+.top-left > div > a > img {
+  border-radius: 90px;
 }
 
 .top-banner {
   display: flex;
-  background-image: url("https:wallpaperplay.com/walls/full/1/b/5/130697.jpg");
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #32a852;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.top-banner > .title {
   color: white;
-  padding: 10px;
-  border: 1px solid white;
-  margin: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
+
+.bottom-banner {
+  display: flex;
+}
+
+.bottom {
+  border-bottom: 1px black solid;
+}
+
+.buttonVec > div > button {
+  color: white;
+  font-weight: bold;
+  background-color: var(--banner-bg-color);
+  width: 80px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px white solid;
+  width: 120px;
+  height: 40px;
+  margin: 5px;
 }
 
 .no-margin {
   margin: 0px;
-}
-
-.side-banner {
-  width: 150px;
-  max-width: 150px;
-  min-width: 150px;
-  position: relative;
-  display: block;
-  /*background: linear-gradient(to bottom, #cc0000 0%, #ff6666 100%);
-  background-image: url("https:wallpaperplay.com/walls/full/5/2/c/112168.jpg");
-  background-image: url("https:wallpaperplay.com/walls/full/4/f/3/130698.jpg");*/
-  background-image: url("https:wallpaperplay.com/walls/full/1/b/5/130697.jpg");
-  color: white;
-  text-decoration: none;
-  padding: 10px;
-  border: 1px solid white;
-  margin: 10px;
-  margin-top: 0px;
 }
 
 .s-link {
@@ -97,10 +149,27 @@ img {
   font-weight: bold;
 }
 
-.side-and-body {
+.middle-row {
+  position: relative;
+  margin-top: 0px;
+  width: 100%;
+  min-height: 450px;
+}
+
+.top-row,
+.bottom-row {
   position: relative;
   display: flex;
   margin-top: 0px;
+  width: 100%;
+}
+
+.left {
+  width: var(--left-col-size);
+}
+.right {
+  width: 100%;
+  margin: 0;
 }
 
 .shopping-cart {
@@ -203,7 +272,7 @@ img {
 
 .item-container {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   background-color: white;
   border: solid 1px black;
   margin: 10px;
@@ -214,13 +283,13 @@ img {
 
 .img-container {
   display: block;
-  margin-right: 5px;
+  margin-right: 0px;
   padding: 2px;
 }
 
 .cart-item-container {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   background-color: white;
   border: solid 1px black;
   margin: 10px;

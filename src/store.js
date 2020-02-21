@@ -7,7 +7,11 @@ function reducer(state, action) {
       return {
         ...state,
         loggedIn: true,
-        username: action.payload.username
+        username: action.payload.username,
+        cart: action.payload.cart,
+        studentHistory: action.payload.studentHistory,
+        currentCourseList: action.payload.currentCourseList,
+        pastCourseList: action.payload.pastCourseList
       };
     }
 
@@ -36,7 +40,10 @@ const store = createStore(
   {
     loggedIn: false,
     username: undefined,
-    courseList: [],
+    cart: [],
+    studentHistory: {},
+    currentCourseList: [],
+    pastCourseList: [],
     purchaseItem: {}
   },
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()

@@ -1,8 +1,8 @@
 import React, { useEffect, Component } from "react";
 import { connect } from "react-redux";
 import { StripeProvider, Elements } from "react-stripe-elements";
-import CheckoutForm from "./CheckoutForm.jsx";
-let jsonConfig = require("../../config.json");
+import CheckoutForm from "../CheckoutForm/CheckoutForm.jsx";
+let jsonConfig = require("../../../config.json");
 let sKey = jsonConfig.secret;
 let pKey = jsonConfig.public;
 

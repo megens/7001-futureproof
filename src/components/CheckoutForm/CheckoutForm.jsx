@@ -24,7 +24,10 @@ const CheckoutForm = ({ selectedProduct, stripe, history }) => {
     console.log("token");
     console.log(token);
     const order = await axios.post("http://localhost:7000/api/stripe/charge", {
-      amount: selectedProduct.price.toString().replace(".", ""),
+      amount: selectedProduct.price
+        .toFixed(2)
+        .toString()
+        .replace(".", ""),
       source: token.id,
       receipt_email: "robert.megens@gmail.com"
     });
