@@ -11,12 +11,9 @@ class Logout extends Component {
     let data = new FormData();
     data.append("username", this.props.username);
     data.append("cart", JSON.stringify(this.props.cart));
-    data.append("designsCart", JSON.stringify(this.props.designsCart));
-    data.append(
-      "personalInventory",
-      JSON.stringify(this.props.personalInventory)
-    );
-    console.log(this.props.cart);
+    data.append("studentHistory", JSON.stringify(this.props.studentHistory));
+    data.append("courseHistory", JSON.stringify(this.props.courseHistory));
+    data.append("questionVec", JSON.stringify(this.props.questionVec));
     let response = await fetch("/logout", { method: "POST", body: data });
     let body = await response.text();
     let parsed = JSON.parse(body);
@@ -27,12 +24,13 @@ class Logout extends Component {
       payload: {
         username: this.props.username,
         cart: this.props.cart,
-        designsCart: this.props.designsCart,
-        personalInventory: this.props.personalInventory,
-        sellerStatus: this.props.sellerStatus
+        studentHistory: this.props.studentHistory,
+        courseHistory: this.props.courseHistory,
+        purchaseItem: this.props.purchaseItem,
+        questionVec: this.props.questionVec
       }
     });
-    this.props.rD.history.push("/login"); // push the User experience to a new path
+    this.props.rD.history.push("/"); // push the User experience to a new path
   };
 
   render = () => {
@@ -52,7 +50,9 @@ const mapStateToProps = (state, props) => {
     loggedIn: state.loggedIn,
     username: state.username,
     cart: state.cart,
-    studentHistory: state.studentHistory
+    studentHistory: state.studentHistory,
+    courseHistory: state.courseHistory,
+    purchaseItem: state.purchaseItem
   };
 };
 

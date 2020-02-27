@@ -5,7 +5,6 @@
 }
 
 body {
-  background: var(--main-bg-color);
   font-family: "Verdana", Geneva, sans-serif;
   font-family: "Open", Sans, sans-serif;
 }
@@ -59,13 +58,18 @@ img {
   display: flex;
   flex-direction: row;
   text-align: right;
-
   background-color: #32a852;
   width: 100%;
-  margin-bottom: 20px;
-
+  margin-bottom: 0px;
   color: white;
   font-size: x-large;
+}
+
+.side-banner {
+  background-color: #32a852;
+  max-width: 150px;
+  height: 100%;
+  min-height: 450px;
 }
 
 .top-left > div {
@@ -83,7 +87,7 @@ img {
   justify-content: space-between;
   background-color: #32a852;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 .top-banner > .title {
   color: white;
@@ -115,6 +119,32 @@ img {
   margin: 5px;
 }
 
+.buttonVec > div > a > button {
+  color: white;
+  font-weight: bold;
+  background-color: #32a852;
+  width: 80px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px white solid;
+  width: 120px;
+  height: 40px;
+  margin: 5px;
+}
+
+.linkButton {
+  color: white;
+  font-weight: bold;
+  background-color: #32a852;
+  width: 80px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px white solid;
+  width: 120px;
+  height: 40px;
+  margin: 5px;
+}
+
 .no-margin {
   margin: 0px;
 }
@@ -122,7 +152,7 @@ img {
 .s-link {
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
     1px 1px 0 #000;
-  margin: 10px;
+  margin: 0px;
   margin-bottom: 20px;
   position: relative;
 }

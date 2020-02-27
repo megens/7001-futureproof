@@ -73,7 +73,11 @@ app.post("/login", upload.none(), (req, res) => {
       res.send(
         JSON.stringify({
           success: true,
-          cart: user.cart
+          username: user.username,
+          cart: user.cart,
+          studentHistory: user.studentHistory,
+          courseHistory: user.courseHistory,
+          questionVec: user.questionVec
         })
       );
       console.log("success : ", user);
@@ -98,7 +102,9 @@ app.post("/signup", upload.none(), async (req, res) => {
     username: name,
     password: pwd,
     cart: [],
-    studentHistory: {}
+    studentHistory: {},
+    courseHistory: [],
+    questionVec: []
   });
   console.log("signup success");
   let sessionId = generateId();
@@ -108,18 +114,27 @@ app.post("/signup", upload.none(), async (req, res) => {
 });
 
 app.post("/logout", upload.none(), async (req, res) => {
+  console.log("entering logout");
   //delete sessions[sessionId];
   //res.cookie("sid", 0); // this sets my cookie to zero, but doesn't actually delete it
   let name = req.body.username;
+  console.log(name);
   let cart = JSON.parse(req.body.cart);
+  console.log(cart);
   let studentHistory = JSON.parse(req.body.studentHistory);
+  console.log("studentHistory ", studentHistory);
+  let courseHistory = JSON.parse(req.body.courseHistory);
+  let questionVec = JSON.parse(req.body.questionVec);
   // i think studentHistory should be updated at every meaningful entry ... too risky to wait for logoff
-  dbo.collection("users").updateOne(
+
+  await dbo.collection("users").updateOne(
     { username: name },
     {
       $set: {
         cart: cart,
-        studentHistory: studentHistory
+        studentHistory: studentHistory,
+        courseHistory: courseHistory,
+        questionVec: questionVec
       }
     }
   );
@@ -140,6 +155,70 @@ app.get("/all-courses", async (req, res) => {
       }
       res.send(JSON.stringify(item));
     });
+});
+
+app.post("/update-my-profile/", upload.none(), async (req, res) => {
+  console.log("request to /update-my-profile");
+  let username = req.body.username;
+  dbo.collection("users").findOne({ username: username }, (err, user) => {
+    if (err) {
+      console.log("/update error error");
+      return res.send(JSON.stringify({ success: false, msg: "db err" }));
+    }
+    if (user === null) {
+      console.log("user === null");
+      return res.send(JSON.stringify({ success: false, msg: "user null" }));
+    } else {
+      console.log("update success");
+      res.send(
+        JSON.stringify({
+          success: true,
+          username: user.username,
+          cart: user.cart,
+          studentHistory: user.studentHistory,
+          courseHistory: user.courseHistory
+        })
+      );
+      console.log("success : ", user);
+      return;
+    }
+  });
+
+  res.send(
+    JSON.stringify({
+      success: true,
+      username: user.username,
+      cart: user.cart,
+      studentHistory: user.studentHistory,
+      courseHistory: user.courseHistory
+    })
+  );
+
+  dbo
+    .collection("courses")
+    .find({})
+    .toArray((err, item) => {
+      if (err) {
+        console.log("error", err);
+        return res.send(JSON.stringify({ success: false }));
+      }
+      res.send(JSON.stringify(item));
+    });
+});
+
+app.post("/record-purchased-course/", upload.none(), async (req, res) => {
+  let name = req.body.username;
+  console.log("name is " + name);
+  let newCourseHistory = JSON.parse(req.body.newCourseHistory);
+
+  await dbo
+    .collection("users")
+    .updateOne(
+      { username: name },
+      { $set: { courseHistory: newCourseHistory } }
+    );
+  console.log("db updated with new courseHistory for " + name);
+  return res.send(JSON.stringify({ success: true }));
 });
 
 // Your endpoints go before this line

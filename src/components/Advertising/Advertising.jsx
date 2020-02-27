@@ -10,7 +10,7 @@ class Advertising extends Component {
     this.state = { slideNumber: 0, slideCount: 3 };
   }
 
-  carouselSpeed = 400000;
+  carouselSpeed = 5000;
 
   componentDidMount = () => {
     console.log("componentDidMount");
@@ -19,7 +19,6 @@ class Advertising extends Component {
   };
 
   componentDidUpdate = () => {
-    console.log("componentDidUpdate");
     clearInterval(this.checkInterval);
     this.checkInterval = setInterval(this.increment, this.carouselSpeed); // rotate carousel every x seconds
   };
@@ -30,7 +29,7 @@ class Advertising extends Component {
 
   increment = () => {
     let destSlideNumber = (this.state.slideNumber + 1) % this.state.slideCount;
-    console.log(destSlideNumber);
+    //console.log(destSlideNumber);
     this.setState({ slideNumber: destSlideNumber });
   };
 
@@ -78,7 +77,11 @@ class Advertising extends Component {
                         {index + 1} / {slideShowElements.length}
                       </div>
                       <div className="middle">
-                        <img src={elem.image} height="400px" width="600px" />
+                        <img
+                          src={elem.image}
+                          height="400px"
+                          max-width="600px"
+                        />
                       </div>
                       <div className="text">{elem.caption}</div>
                     </div>

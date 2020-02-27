@@ -29,9 +29,7 @@ class Signup extends Component {
       this.props.dispatch({
         type: "LOGIN-SUCCESS",
         payload: {
-          username,
-          cart: parsed.cart,
-          studentHistory: parsed.studentHistory
+          username
         }
       });
       //this.props.setUsername(username);

@@ -6,6 +6,10 @@ class Login extends Component {
     super(props);
     this.state = { usernameInput: "", passwordInput: "" };
   }
+
+  componentDidMount = () => {
+    this.nameInput.focus();
+  };
   usernameChange = evt => {
     this.setState({ usernameInput: evt.target.value });
   };
@@ -35,13 +39,13 @@ class Login extends Component {
         payload: {
           username,
           cart: parsed.cart,
+          courseHistory: parsed.courseHistory,
           studentHistory: parsed.studentHistory,
-          currentCourseList: parsed.currentCourseList,
-          pastCourseList: parsed.pastCourseList
+          questionVec: parsed.questionVec
         }
       });
       //this.props.setUsername(username);
-      this.props.rD.history.push("/myProfile/");
+      this.props.rD.history.push("/myProfile/" + username);
     }
   };
 
@@ -55,6 +59,9 @@ class Login extends Component {
           Username:
           <input
             type="text"
+            ref={input => {
+              this.nameInput = input;
+            }}
             onChange={this.usernameChange}
             value={this.state.usernameInput}
           ></input>{" "}
