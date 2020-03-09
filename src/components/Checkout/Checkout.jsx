@@ -28,16 +28,19 @@ class Checkout extends Component {
     console.log(this.props.purchaseItem);
     console.log(this.props.rD);
 
-    let newCourseHistory = this.props.courseHistory.slice();
-    newCourseHistory.push(this.props.purchaseItem);
-
+    /*
+    let newsubscriptions = JSON.parse(JSON.stringify(this.props.subscriptions));
+    newsubscriptions[
+      this.props.purchaseItem.courseCode
+    ] = this.props.purchaseItem;
+    */
     return (
       <StripeProvider apiKey={pKey}>
         <Elements>
           <CheckoutForm
             selectedProduct={this.props.purchaseItem}
             history={this.props.rD.history}
-            newCourseHistory={newCourseHistory} // update replaces the entire array on mongo's userDB
+            // removed combined subscriptions
             username={this.props.username}
           />
         </Elements>
@@ -50,7 +53,7 @@ const mapStateToProps = state => {
   return {
     username: state.username,
     purchaseItem: state.purchaseItem,
-    courseHistory: state.courseHistory
+    subscriptions: state.subscriptions
   };
 };
 

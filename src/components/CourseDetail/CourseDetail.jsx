@@ -23,15 +23,14 @@ class CourseDetail extends Component {
   };
 
   render = () => {
+    const courseCodeKeys = Object.keys(this.props.subscriptions);
     let courseMatch = this.props.courseList.find(course => {
       return course.courseCode.toString() === this.props.courseCode;
     });
     let alreadyHave =
       undefined !==
-      this.props.courseHistory.find(course => {
-        return (
-          course.courseCode.toString() === this.props.courseCode.toString()
-        );
+      courseCodeKeys.find(course => {
+        return course === this.props.courseCode.toString();
       });
     console.log(alreadyHave);
 
@@ -71,7 +70,7 @@ const mapStateToProps = state => {
     username: state.username,
     purchaseItem: state.purchaseItem,
     courseList: state.courseList,
-    courseHistory: state.courseHistory
+    subscriptions: state.subscriptions
   };
 };
 

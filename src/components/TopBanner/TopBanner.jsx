@@ -20,14 +20,18 @@ class TopBanner extends Component {
             {this.props.loggedIn ? "[" + this.props.username + "]" : ""}
           </div>
           <div className="icons">
-            <img src="/logos/phone-24px.svg" height="40px" />
+            <i className="fas fa-at top-icon"></i>
+            <i className="fas fa-phone top-icon"></i>
+
             {
               //<img src="/logos/shopping_basket-24px.svg" height="40px" />
             }
-            <Link to={"/cart"}>
-              <img src="/logos/add_shopping_cart-24px.svg" height="40px" />
-              <span id="cart-count">{totalCart}</span>
-            </Link>
+            <div className="cart-plus-count">
+              <Link to={"/cart"}>
+                <i className="fas fa-shopping-cart top-icon" height="90px"></i>
+                <span id="cart-count">{totalCart}</span>
+              </Link>
+            </div>
             {this.props.loggedIn ? (
               <Link to={"/myProfile/" + this.props.username}>
                 <button type="button" className="linkButton">

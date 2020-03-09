@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-class AnswerSubmitted extends Component {
+class AnswerTemplate extends Component {
   constructor(props) {
     super(props);
     this.state = { qFlagged: false };
@@ -17,48 +17,57 @@ class AnswerSubmitted extends Component {
   render = () => {
     console.log("answer submitted");
     console.log("isCorrect: " + this.props.isCorrect);
+    let courseCode = this.props.currentQuestion.courseCode;
+    let qNum = this.props.currentQuestion.qNum;
 
     return (
       <div>
-        <div>Question: {this.props.qNumber}</div>
-        <div>Response: {this.props.isCorrect ? "Correct" : "Incorrect"}</div>
+        <div>Question: {this.props.currentQuestion.qNum}</div>
+        <div>
+          Response:{" "}
+          {this.props.currentQuestion.response_submitted ===
+          this.props.currentQuestion.response_correct
+            ? "Correct"
+            : "Incorrect"}
+        </div>
         <br />
 
-        <Link to={"/question/" + this.props.qNumber}>
+        <Link to={"/question/" + this.props.currentQuestion.qNum}>
           <button className="icon-btn short">
-            End <i className="fas fa-fast-backward"></i>
+            <i className="fas fa-fast-backward"></i> End
           </button>
         </Link>
 
-        <Link to={"/question/" + this.props.qNumber}>
+        <Link to={"/question/" + this.props.currentQuestion.qNum}>
           <button className="icon-btn short">
-            -10 <i className="fas fa-backward"></i>
+            <i className="fas fa-backward"></i> -10
           </button>
         </Link>
 
-        <Link to={"/question/" + this.props.qNumber}>
+        <Link to={"/question/" + this.props.currentQuestion.qNum}>
           <button className="icon-btn short">
-            -1 <i className="fas fa-step-backward"></i>
+            <i className="fas fa-step-backward"></i> -1
           </button>
         </Link>
 
-        <Link to={"/question/" + this.props.qNumber}>
+        <Link to={"/question/" + this.props.currentQuestion.qNum}>
           <button className="icon-btn short">
             <i className="fas fa-step-forward"></i> +1
           </button>
         </Link>
 
-        <Link to={"/question/" + this.props.qNumber}>
+        <Link to={"/question/" + this.props.currentQuestion.qNum}>
           <button className="icon-btn short">
             <i className="fas fa-forward"></i> +10
           </button>
         </Link>
 
-        <Link to={"/question/" + this.props.nextQuestion}>
+        <Link to={"/question/" + "101/101-0002"}>
           <button className="icon-btn short">
             <i className="fas fa-fast-forward"></i> End
           </button>
         </Link>
+
         <br />
         <br />
         <button className="icon-btn short" onClick={this.flagQuestion}>
@@ -90,8 +99,8 @@ const mapStateToProps = state => {
   return {
     subscriptions: state.subscriptions,
     studentHistory: state.studentHistory,
-    nextQuestion: state.nextQuestion
+    currentQuestion: state.currentQuestion
   };
 };
 
-export default connect(mapStateToProps)(AnswerSubmitted);
+export default connect(mapStateToProps)(AnswerTemplate);

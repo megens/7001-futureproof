@@ -29,10 +29,15 @@ class Signup extends Component {
       this.props.dispatch({
         type: "LOGIN-SUCCESS",
         payload: {
-          username
+          username,
+          cart: [],
+          subscriptions: {},
+          subscriptionSettings: {},
+          subscribedCourses: {},
+          studentHistory: {}
         }
       });
-      //this.props.setUsername(username);
+      this.props.rD.history.push("/myProfile/" + username);
     }
   };
 

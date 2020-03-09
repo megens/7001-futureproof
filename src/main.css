@@ -1,6 +1,7 @@
 :root {
   --main-bg-color: white;
-  --banner-bg-color: #32a852;
+  --banner-bg-color: royalblue;
+  --banner-hover-color: white;
   --left-col-size: 190px;
 }
 
@@ -42,8 +43,10 @@ img {
   float: right;
   align-items: center;
 }
-.icons > img {
-  margin: 15px;
+
+.cart-plus-count {
+  position: relative;
+  margin-right: 20px;
 }
 
 .popup {
@@ -58,7 +61,7 @@ img {
   display: flex;
   flex-direction: row;
   text-align: right;
-  background-color: #32a852;
+  background-color: var(--banner-bg-color);
   width: 100%;
   margin-bottom: 0px;
   color: white;
@@ -66,7 +69,7 @@ img {
 }
 
 .side-banner {
-  background-color: #32a852;
+  background-color: var(--banner-bg-color);
   max-width: 150px;
   height: 100%;
   min-height: 450px;
@@ -85,9 +88,10 @@ img {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background-color: #32a852;
+  background-color: var(--banner-bg-color);
   width: 100%;
   margin-bottom: 0px;
+  font-size: x-large;
 }
 .top-banner > .title {
   color: white;
@@ -117,12 +121,13 @@ img {
   width: 120px;
   height: 40px;
   margin: 5px;
+  outline: 0;
 }
 
 .buttonVec > div > a > button {
   color: white;
   font-weight: bold;
-  background-color: #32a852;
+  background-color: var(--banner-bg-color);
   width: 80px;
   height: 40px;
   border-radius: 8px;
@@ -135,7 +140,7 @@ img {
 .linkButton {
   color: white;
   font-weight: bold;
-  background-color: #32a852;
+  background-color: var(--banner-bg-color);
   width: 80px;
   height: 40px;
   border-radius: 8px;
@@ -240,11 +245,11 @@ img {
 
 #cart-count {
   position: absolute;
-  top: -7px;
-  right: -5px;
-  background: red;
-  color: white;
-  border: solid black 3px;
+  top: -12px;
+  right: -1px;
+  background: white;
+  color: black;
+  border: solid black 1px;
   border-radius: 50%;
   width: 22px;
   height: 22px;
@@ -400,4 +405,52 @@ input[type="number"] {
 #balance-div {
   margin-top: 5px;
   font-weight: bold;
+}
+
+.icon-btn {
+  background-color: var(--banner-bg-color);
+  color: white;
+  background-color: white;
+  color: var(--banner-bg-color);
+  border: none;
+  border-radius: 8px;
+  border: 2px solid;
+  padding: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+  outline: 0;
+  text-align: left;
+  align-content: space-between;
+  position: relative;
+}
+
+.icon-btn > span {
+  position: absolute;
+  left: 33px;
+}
+
+/* Darker background on mouse-over */
+.icon-btn:hover {
+  color: white;
+  background-color: var(--banner-bg-color);
+}
+
+.short {
+  width: 100px;
+}
+
+.long {
+  width: 105px;
+}
+
+.top-icon {
+  color: white;
+  font-size: xx-large;
+  margin-right: 20px;
+}
+
+.top-icon:hover {
+  color: lightgrey;
 }

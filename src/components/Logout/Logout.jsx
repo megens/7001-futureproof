@@ -12,8 +12,13 @@ class Logout extends Component {
     data.append("username", this.props.username);
     data.append("cart", JSON.stringify(this.props.cart));
     data.append("studentHistory", JSON.stringify(this.props.studentHistory));
-    data.append("courseHistory", JSON.stringify(this.props.courseHistory));
-    data.append("questionVec", JSON.stringify(this.props.questionVec));
+    data.append("subscriptions", JSON.stringify(this.props.subscriptions));
+    console.log("subscriptionSettings is " + this.props.subscriptionSettings);
+    data.append(
+      "subscriptionSettings",
+      JSON.stringify(this.props.subscriptionSettings)
+    );
+
     let response = await fetch("/logout", { method: "POST", body: data });
     let body = await response.text();
     let parsed = JSON.parse(body);
@@ -24,10 +29,7 @@ class Logout extends Component {
       payload: {
         username: this.props.username,
         cart: this.props.cart,
-        studentHistory: this.props.studentHistory,
-        courseHistory: this.props.courseHistory,
-        purchaseItem: this.props.purchaseItem,
-        questionVec: this.props.questionVec
+        studentHistory: this.props.studentHistory
       }
     });
     this.props.rD.history.push("/"); // push the User experience to a new path
@@ -51,8 +53,9 @@ const mapStateToProps = (state, props) => {
     username: state.username,
     cart: state.cart,
     studentHistory: state.studentHistory,
-    courseHistory: state.courseHistory,
-    purchaseItem: state.purchaseItem
+    subscriptions: state.subscriptions,
+    subscriptionSettings: state.subscriptionSettings,
+    subscribedCourses: state.subscribedCourses
   };
 };
 

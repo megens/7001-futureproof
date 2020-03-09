@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import QTimer from "../QTimer/QTimer.jsx";
-import { Link } from "react-router-dom";
 
-class AskQuestion extends Component {
+class Template002 extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -148,4 +146,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(AskQuestion);
+export default connect(mapStateToProps)(Template002);

@@ -19,6 +19,7 @@ const slideShowElements = [
     sideText:
       "What’s the MCAT exam? The Medical College Admission Test® (MCAT®) is a standardized, multiple-choice, computer-based test that has been a part of the medical school admissions process for more than 90 years. Each year, more than 85,000 students sit for the exam.",
     linkVec: ["MCAT"],
+
     image: "/logos/medical2.JPG",
     image: "/logos/future_doctors.png",
     caption: ""

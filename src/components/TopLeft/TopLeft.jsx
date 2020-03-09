@@ -12,7 +12,7 @@ class TopLeft extends Component {
         <div className="top-left top left">
           <div>
             <Link to={"/"}>
-              <img src="/logos/futureproof_green_capture.JPG" height="80px" />
+              <img src="/logos/future proof Bold Blue.jpg" height="80px" />
             </Link>
           </div>
         </div>

@@ -40,7 +40,7 @@ class Course extends Component {
 
 const mapStateToProps = state => {
   return {
-    courseHistory: state.courseHistory,
+    subscriptions: state.subscriptions,
     currentCourseRun: state.currentCourseRun
   };
 };

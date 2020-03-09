@@ -6,65 +6,39 @@ class MyProfile extends Component {
   constructor(props) {
     super(props);
   }
-  componentDidMount = async () => {
-    // need this ONLY because I'm not currently able to update my Redux state for purchases, since this is from a functional component, not a React Component, so I can't dispatch from it?
-    //console.log("COMPONENT DID MOUNT");
-    //this.refreshProfile();
-  };
 
-  // COOKIE LOGIC HERE
+  // COOKIE LOGIC HERE?
 
-  /*
-  refreshProfile = async () => {
-    console.log("refreshing");
-    let data = new FormData();
-    let username = this.props.username;
-    data.append("username", username);
-    let response = await fetch("/update-my-profile/", {
-      method: "POST",
-      body: data
-    });
-    let body = await response.text();
-    let parsed = JSON.parse(body);
-    this.props.dispatch({
-      type: "LOGIN-SUCCESS",
-      payload: {
-        username,
-        cart: parsed.cart,
-        courseHistory: parsed.courseHistory,
-        studentHistory: parsed.studentHistory
-      }
-    });
+  componentDidMount = () => {
+    console.log("MOUNT MyProfile");
   };
-*/
 
   render = () => {
-    console.log("courseHistory");
-    console.log(this.props.courseHistory);
+    const courseCodeKeys = Object.keys(this.props.subscriptions);
+    console.log("courseCodeKeys");
+    console.log(courseCodeKeys);
     return (
       <>
-        <b>
-          <u>MY ACTIVE SUBSCRIPTION(S)</u>
-        </b>
+        <b>ACTIVE SUBSCRIPTIONS</b>
         <div className="buttonVec">
-          {this.props.courseHistory.map((x, idx) => {
+          {/*
+          {this.props.subscriptions.map((x, idx) => {
+          */}
+          {courseCodeKeys.map((courseCode, idx) => {
             return (
               <div key={idx}>
-                <Link to={"/courseRun/" + x.courseCode}>
+                <Link to={"/courseRun/" + courseCode}>
                   <button type="button">
-                    <b>{x.courseCode}</b>
+                    <b>{courseCode}</b>
                   </button>
                 </Link>
               </div>
             );
           })}
         </div>
-        <Link to={"/myCourseHistory/:" + this.props.username}>
-          <div>
-            <b>
-              <u>PAST SUBSCRIPTIONS</u>
-            </b>
-          </div>
+        <br />
+        <Link to={"/mysubscriptions/:" + this.props.username}>
+          <div>ARCHIVED SUBSCRIPTIONS</div>
         </Link>
       </>
     );
@@ -76,9 +50,7 @@ const mapStateToProps = (state, props) => {
   return {
     loggedIn: state.loggedIn,
     username: state.username,
-    cart: state.cart,
-    studentHistory: state.studentHistory,
-    courseHistory: state.courseHistory
+    subscriptions: state.subscriptions
   };
 };
 

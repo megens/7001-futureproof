@@ -5,23 +5,32 @@ import { Link } from "react-router-dom";
 class QTimer extends Component {
   constructor(props) {
     super(props);
-
-    this.state = { elapsedTime: 0, timerOn: true };
+    this.state = {
+      elapsedTime: this.props.elapsedTime,
+      timerOn: false
+    };
   }
 
   componentDidMount = () => {
+    console.log("MOUNT QTimer");
+    console.log(this.props.currentQuestion.qNum);
     this.startTime = new Date().toLocaleString();
-    this.tickInterval = 1000;
-    this.intervalID = setInterval(this.tick, this.tickInterval);
+    if (!this.props.currentQuestion.complete) {
+      this.setState({ timerOn: true });
+      this.intervalID = setInterval(this.tick, this.tickInterval);
+    }
   };
 
   componentWillUnmount = () => {
     clearInterval(this.intervalID);
   };
 
+  tickInterval = 1000;
+
   tick = () => {
     //console.log("tick");
-    if (this.state.timerOn) {
+
+    if (this.state.timerOn && !this.props.currentQuestion.complete) {
       this.setState({
         elapsedTime: this.state.elapsedTime + this.tickInterval / 1000
       });
@@ -33,6 +42,7 @@ class QTimer extends Component {
   };
 
   pauseTimer = () => {
+    console.log("switching from " + this.state.timerOn);
     this.setState({ timerOn: !this.state.timerOn });
   };
 
@@ -51,9 +61,20 @@ class QTimer extends Component {
 
     return (
       <div>
-        Elapsed Time is {showElapsed}
-        <button type="button" onClick={this.pauseTimer}>
-          {this.state.timerOn ? "Pause Timer" : "Start Timer"}
+        <button
+          className="icon-btn"
+          id="icon-timer"
+          onClick={this.pauseTimer}
+          key={this.state.timerOn} // to force a re-render
+        >
+          <i className="fas fa-stopwatch"></i>
+          {"  "}
+          {this.state.timerOn ? (
+            <i className="fas fa-pause" />
+          ) : (
+            <i className="fas fa-play" />
+          )}{" "}
+          {showElapsed}
         </button>
       </div>
     );
@@ -62,8 +83,10 @@ class QTimer extends Component {
 
 const mapStateToProps = state => {
   return {
-    courseHistory: state.courseHistory,
-    studentHistory: state.studentHistory
+    subscriptions: state.subscriptions,
+    studentHistory: state.studentHistory,
+    elapsedTime: state.elapsedTime,
+    currentQuestion: state.currentQuestion
   };
 };
 

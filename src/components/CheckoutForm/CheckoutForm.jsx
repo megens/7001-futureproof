@@ -10,18 +10,15 @@ import {
 import axios from "axios";
 //import "./CheckoutForm.scss";
 
-const CheckoutForm = ({
-  selectedProduct,
-  stripe,
-  history,
-  newCourseHistory,
-  username
-}) => {
-  const courseHistory = useSelector(state => state.courseHistory);
+const CheckoutForm = ({ selectedProduct, stripe, history, username }) => {
+  const subscriptions = useSelector(state => state.subscriptions);
+  const subscriptionSettings = useSelector(state => state.subscriptionSettings);
+  const studentHistory = useSelector(state => state.studentHistory);
+  const subscribedCourses = useSelector(state => state.subscribedCourses);
   const dispatch = useDispatch();
 
+  console.log("prev subscriptions is", subscriptions);
   console.log("selected product is", selectedProduct);
-  console.log("newCourseHistory is", newCourseHistory);
 
   if (selectedProduct === null) history.push("/");
 
@@ -35,8 +32,14 @@ const CheckoutForm = ({
       if (receiptUrl) {
         console.log("unmount with receipt");
         dispatch({
-          type: "UPDATE-COURSE-HISTORY",
-          payload: newCourseHistory
+          type: "NEW-PURCHASE",
+          payload: {
+            subscriptions: subscriptions,
+            subscriptionSettings: subscriptionSettings,
+            studentHistory: studentHistory,
+            selectedProduct: selectedProduct,
+            subscribedCourses: subscribedCourses
+          }
         });
       } else {
         console.log("unmount no receipt");
@@ -63,10 +66,13 @@ const CheckoutForm = ({
     setReceiptUrl(order.data.charge.receipt_url);
   };
 
-  const updateServerWithPurchase = async (newCourseHistory, username) => {
+  const updateServerWithPurchase = async (subscriptions, username) => {
     console.log("username is " + username);
     let data = new FormData();
-    data.append("newCourseHistory", JSON.stringify(newCourseHistory));
+    data.append("prevSubscriptions", JSON.stringify(subscriptions));
+    data.append("prevStudentHistory", JSON.stringify(studentHistory));
+    data.append("selectedProduct", JSON.stringify(selectedProduct));
+
     data.append("username", username);
     let response = await fetch("/record-purchased-course/", {
       method: "POST",
@@ -81,9 +87,9 @@ const CheckoutForm = ({
   if (receiptUrl) {
     console.log("receiptUrl");
     console.log(receiptUrl);
-    updateServerWithPurchase(newCourseHistory, username);
+    updateServerWithPurchase(subscriptions, username);
 
-    //dispatch({ type: "UPDATE-COURSE-HISTORY", payload: newCourseHistory }); NEED SOMETHING LIKE THIS NOT IN RENDER
+    //dispatch({ type: "UPDATE-COURSE-HISTORY", payload: newsubscriptions }); NEED SOMETHING LIKE THIS NOT IN RENDER
 
     //Need to specify a second argument, which is an array
 

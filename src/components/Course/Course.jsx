@@ -8,20 +8,22 @@ class Course extends Component {
   }
 
   render = () => {
+    const courseCodeKeys = Object.keys(this.props.subscriptions);
+    console.log("courseCodeKeys");
+    console.log(courseCodeKeys);
+
     const { _id, courseCode, courseName, desc, price } = this.props.course;
-    console.log("course history is ");
-    console.log(this.props.courseHistory);
     console.log("courseCode is " + courseCode);
-    this.props.courseHistory.forEach(course => {
-      console.log("courseHistory courseCode is " + course.courseCode);
-      console.log(course.courseCode + " = " + courseCode + "?");
-      console.log(course.courseCode === courseCode);
+    courseCodeKeys.forEach(course => {
+      console.log("subscriptions courseCode is " + course);
+      console.log(course + " = " + courseCode + "?");
+      console.log(course === courseCode);
     });
 
     let alreadyHave =
       undefined !==
-      this.props.courseHistory.find(course => {
-        return course.courseCode.toString() === courseCode.toString();
+      courseCodeKeys.find(course => {
+        return course === courseCode.toString();
       });
     console.log("already Have?");
     console.log(alreadyHave);
@@ -55,7 +57,7 @@ const mapStateToProps = state => {
   return {
     username: state.username,
     purchaseItem: state.purchaseItem,
-    courseHistory: state.courseHistory
+    subscriptions: state.subscriptions
   };
 };
 

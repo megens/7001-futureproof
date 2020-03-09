@@ -28,9 +28,7 @@ app.use("/icons", express.static("icons"));
 app.use("/logos", express.static("logos"));
 
 let dbo = undefined;
-/*
-let url = "mongodb+srv://... see config.json (imported file)";
-*/
+//let url = "mongodb+srv://... see config.json (imported file)";
 MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
   dbo = db.db("futureProofMe"); //
 });
@@ -52,38 +50,89 @@ app.use((_, res, next) => {
   next();
 }); // enable CORS for all requests
 
-app.post("/login", upload.none(), (req, res) => {
+app.post("/login", upload.none(), async (req, res) => {
   console.log("login", req.body);
+  console.log(req.body.username);
+  console.log(req.body.password);
+  let returnObject = {};
   let name = req.body.username;
   let pwd = sha1(req.body.password); // immediately hash password
-  dbo.collection("users").findOne({ username: name }, (err, user) => {
-    if (err) {
-      console.log("/login error");
-      return res.send(JSON.stringify({ success: false, msg: "db err" }));
-    }
-    if (user === null) {
-      console.log("user === null");
-      return res.send(JSON.stringify({ success: false, msg: "user null" }));
-    }
-    if (user.password === pwd) {
-      console.log("login success");
-      let sessionId = generateId();
-      sessions[sessionId] = name;
-      res.cookie("sid", sessionId);
-      res.send(
-        JSON.stringify({
+  console.log("start call to DB");
+  await dbo
+    .collection("users")
+    .findOne({ username: name }, async (err, user) => {
+      console.log("in call to DB");
+      if (err) {
+        console.log("/login error");
+        returnObject = { success: false, msg: "db err" };
+      }
+      if (user === null) {
+        console.log("user === null");
+        returnObject = { success: false, msg: "user null" };
+      }
+      if (user.password === pwd) {
+        console.log("login success");
+        let sessionId = generateId();
+        sessions[sessionId] = name;
+        res.cookie("sid", sessionId);
+        //
+
+        returnObject = {
           success: true,
           username: user.username,
           cart: user.cart,
           studentHistory: user.studentHistory,
-          courseHistory: user.courseHistory,
-          questionVec: user.questionVec
-        })
-      );
-      console.log("success : ", user);
-      return;
-    }
-  });
+          subscriptions: user.subscriptions,
+          subscriptionSettings: user.subscriptionSettings
+        };
+        console.log("success : ", user);
+        console.log("returnObject is ");
+        console.log(returnObject);
+
+        console.log("go to build subscribedCourses");
+
+        // need to define a new fn to execute an async / await within a forEach
+        // https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404
+        // subscribedCourses is a bit unique because it is BUILT from "live" objects on the DB,
+        // depending what the user has subscribed to.
+
+        let subscribedCoursesTemp = {};
+        const subscriptionKeys = Object.keys(user.subscriptions);
+
+        const asyncForeach = async (array, callback) => {
+          console.log("asyncForEach");
+          console.log(array.length);
+          for (let index = 0; index < array.length; index++) {
+            console.log("hi");
+            console.log(array[index]);
+            await callback(array[index]);
+          }
+        };
+
+        const loadCourse = async x => {
+          console.log("ok2");
+          const course = await dbo
+            .collection("courses")
+            .findOne({ courseCode: Number(x) });
+          console.log("ok3");
+          console.log(x);
+          console.log(course);
+          subscribedCoursesTemp[x] = course;
+          console.log("subscribedCourses");
+          console.log(subscribedCoursesTemp);
+        };
+
+        const finalBuild = async () => {
+          console.log("ok1");
+          await asyncForeach(subscriptionKeys, loadCourse);
+          console.log("done");
+          returnObject.subscribedCourses = subscribedCoursesTemp;
+          return res.send(JSON.stringify(returnObject));
+        };
+
+        finalBuild();
+      }
+    });
 });
 
 app.post("/signup", upload.none(), async (req, res) => {
@@ -102,9 +151,10 @@ app.post("/signup", upload.none(), async (req, res) => {
     username: name,
     password: pwd,
     cart: [],
-    studentHistory: {},
-    courseHistory: [],
-    questionVec: []
+    studentHistory: [],
+    subscriptions: [],
+    subscribedCourses: [],
+    subscriptionSettings: []
   });
   console.log("signup success");
   let sessionId = generateId();
@@ -123,9 +173,15 @@ app.post("/logout", upload.none(), async (req, res) => {
   console.log(cart);
   let studentHistory = JSON.parse(req.body.studentHistory);
   console.log("studentHistory ", studentHistory);
-  let courseHistory = JSON.parse(req.body.courseHistory);
-  let questionVec = JSON.parse(req.body.questionVec);
+  console.log("subscriptions");
+  let subscriptions = JSON.parse(req.body.subscriptions);
+  console.log("subscriptionSettings");
+  let subscriptionSettings = JSON.parse(req.body.subscriptionSettings);
+
   // i think studentHistory should be updated at every meaningful entry ... too risky to wait for logoff
+  console.log("subscriptions and settings");
+  console.log(subscriptions);
+  console.log(subscriptionSettings);
 
   await dbo.collection("users").updateOne(
     { username: name },
@@ -133,8 +189,8 @@ app.post("/logout", upload.none(), async (req, res) => {
       $set: {
         cart: cart,
         studentHistory: studentHistory,
-        courseHistory: courseHistory,
-        questionVec: questionVec
+        subscriptionSettings: subscriptionSettings
+        //subscriptions themselves are updated at time of purchase
       }
     }
   );
@@ -176,7 +232,7 @@ app.post("/update-my-profile/", upload.none(), async (req, res) => {
           username: user.username,
           cart: user.cart,
           studentHistory: user.studentHistory,
-          courseHistory: user.courseHistory
+          subscriptions: user.subscriptions
         })
       );
       console.log("success : ", user);
@@ -190,7 +246,7 @@ app.post("/update-my-profile/", upload.none(), async (req, res) => {
       username: user.username,
       cart: user.cart,
       studentHistory: user.studentHistory,
-      courseHistory: user.courseHistory
+      subscriptions: user.subscriptions
     })
   );
 
@@ -209,15 +265,25 @@ app.post("/update-my-profile/", upload.none(), async (req, res) => {
 app.post("/record-purchased-course/", upload.none(), async (req, res) => {
   let name = req.body.username;
   console.log("name is " + name);
-  let newCourseHistory = JSON.parse(req.body.newCourseHistory);
+  let prevSubscriptions = JSON.parse(req.body.prevSubscriptions);
+  let prevStudentHistory = JSON.parse(req.body.prevStudentHistory);
+  let newProduct = JSON.parse(req.body.selectedProduct);
 
-  await dbo
-    .collection("users")
-    .updateOne(
-      { username: name },
-      { $set: { courseHistory: newCourseHistory } }
-    );
-  console.log("db updated with new courseHistory for " + name);
+  let newSubscriptions = JSON.parse(JSON.stringify(prevSubscriptions));
+  let newStudentHistory = JSON.parse(JSON.stringify(prevStudentHistory));
+  newSubscriptions[newProduct.courseCode] = newProduct;
+  newStudentHistory[newProduct.courseCode] = [];
+
+  await dbo.collection("users").updateOne(
+    { username: name },
+    {
+      $set: {
+        subscriptions: newSubscriptions,
+        studentHistory: newStudentHistory
+      }
+    }
+  );
+  console.log("db updated with new subscriptions for " + name);
   return res.send(JSON.stringify({ success: true }));
 });
 

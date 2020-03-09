@@ -1,10 +1,11 @@
 import React, { Component } from "react";
-import { Link, Route, BrowserRouter, withRouter } from "react-router-dom";
+import { Route } from "react-router-dom";
 import { connect } from "react-redux";
 import CourseShelf from "../CourseShelf/CourseShelf.jsx";
 import CourseDetail from "../CourseDetail/CourseDetail.jsx";
 import CourseRun from "../CourseRun/CourseRun.jsx";
-import AskQuestion from "../AskQuestion/AskQuestion.jsx";
+import AskQ from "../AskQuestion/AskQ.jsx";
+import TestQ from "../AskQuestion/TestQ.jsx";
 import AnswerSubmitted from "../AnswerSubmitted/AnswerSubmitted.jsx";
 import Advertising from "../Advertising/Advertising.jsx";
 import Checkout from "../Checkout/Checkout.jsx";
@@ -18,6 +19,15 @@ class Routes extends Component {
   constructor() {
     super();
   }
+
+  componentDidMount = () => {
+    console.log("MOUNT Routes and Paths");
+    console.log(this.props.studentHistory);
+  };
+
+  componentDidUpdate = () => {
+    console.log("UPDATE Routes and Paths");
+  };
 
   renderLoginSignup = routerData => {
     console.log("renderLoginSignup");
@@ -49,11 +59,6 @@ class Routes extends Component {
     }
   };
 
-  renderSideOnly = () => {
-    console.log("at side only");
-    return <SideBanner />;
-  };
-
   renderAdvertising = () => {
     return <Advertising />;
   };
@@ -81,19 +86,74 @@ class Routes extends Component {
 
   renderMyProfile = routerData => {
     let userId = routerData.match.params.username;
-    return <MyProfile userId={userId} rD={routerData} />;
+    return <MyProfile rD={routerData} />;
   };
 
   renderCourseRun = routerData => {
     let courseCode = routerData.match.params.courseCode;
     console.log("running course " + courseCode);
-    return <CourseRun courseCode={courseCode} rD={routerData} />;
+    return <CourseRun courseCode={courseCode} />;
   };
 
   renderQuestion = routerData => {
+    let courseCode = routerData.match.params.courseCode;
     let qNumber = routerData.match.params.qNum;
-    console.log("asking question " + qNumber);
-    return <AskQuestion qNumber={qNumber} rD={routerData} />;
+    let currentQuestion = {};
+    // if question is not in your history, put it in your history
+    console.log("render question");
+    console.log(courseCode);
+    console.log("studentHistory");
+    console.log(this.props.studentHistory);
+    currentQuestion = this.props.studentHistory[courseCode].find(question => {
+      return question.qNum.toString() === qNumber;
+    });
+    if (!currentQuestion) {
+      console.log("this.props.subscribedCourses[courseCode]");
+      console.log(this.props.subscribedCourses);
+      console.log(this.props.subscribedCourses[courseCode]);
+      console.log(qNumber);
+      currentQuestion = this.props.subscribedCourses[
+        courseCode
+      ].questionVec.find(question => {
+        return question.qNum.toString() === qNumber;
+      });
+      console.log("currentQuestion");
+      console.log(currentQuestion);
+      console.log("and now this");
+      let studentHistoryCopy = JSON.parse(
+        JSON.stringify(this.props.studentHistory)
+      );
+      console.log(studentHistoryCopy);
+      console.log(studentHistoryCopy[courseCode]);
+      console.log(studentHistoryCopy[courseCode].slice());
+      let courseSlice = studentHistoryCopy[courseCode].slice();
+      console.log("courseSlice");
+      console.log(courseSlice);
+      courseSlice.push(currentQuestion);
+      console.log("courseSlice");
+      console.log(courseSlice);
+      studentHistoryCopy[courseCode] = courseSlice;
+      console.log("studentHistoryCopy");
+      console.log(studentHistoryCopy);
+      console.log("about to Dispatch");
+      console.log("SET-STUDENTHISTORY-AND-CURRENT-Q");
+      this.props.dispatch({
+        type: "SET-STUDENTHISTORY-AND-CURRENT-Q",
+        payload: {
+          studentHistoryCopy: studentHistoryCopy,
+          currentQuestion: currentQuestion
+        }
+      });
+    } else {
+      console.log("SET-CURRENT-QUESTION");
+      this.props.dispatch({
+        type: "SET-CURRENT-QUESTION",
+        payload: { currentQuestion: currentQuestion }
+      });
+    }
+    console.log("about to return AskQ from routes");
+    console.log(currentQuestion);
+    return <AskQ rD={routerData} />;
   };
 
   renderAnswerSubmitted = routerData => {
@@ -135,7 +195,7 @@ class Routes extends Component {
         />
         <Route
           exact={true}
-          path="/question/:qNum"
+          path="/question/:courseCode/:qNum"
           render={this.renderQuestion}
         />
         <Route
@@ -151,7 +211,9 @@ class Routes extends Component {
 const mapStateToProps = state => {
   return {
     loggedIn: state.loggedIn,
-    username: state.username
+    username: state.username,
+    subscribedCourses: state.subscribedCourses,
+    studentHistory: state.studentHistory
   }; // THIS WILL CHANGE
 };
 
