@@ -39,10 +39,11 @@ class Login extends Component {
         payload: {
           username,
           cart: parsed.cart,
+          studentHistory: parsed.studentHistory,
           subscriptions: parsed.subscriptions,
           subscribedCourses: parsed.subscribedCourses,
           subscriptionSettings: parsed.subscriptionSettings,
-          studentHistory: parsed.studentHistory
+          subscribedAllResponses: parsed.subscribedAllResponses
         }
       });
       //this.props.setUsername(username);

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+const deepCopy = require("rfdc")(); // a really fast deep copy function
 
 class Template001 extends Component {
   constructor(props) {
@@ -11,123 +12,180 @@ class Template001 extends Component {
 
   componentDidMount = () => {
     console.log("MOUNT Template001");
+    console.log(this.props.currentQuestion);
   };
 
   componentDidUpdate = () => {
     console.log("UPDATE Template001");
-    console.log(this.props.currentQuestion);
   };
 
-  currentQuestionStart = JSON.parse(JSON.stringify(this.props.currentQuestion));
-  response_correct = this.props.currentQuestion.response_correct;
-  courseCode = this.props.currentQuestion.courseCode;
+  componentWillUnmount = () => {
+    // this will record elapsedTime, but otherwise leave currentQuestion open
+    if (
+      !this.props.currentQuestion.complete ||
+      !this.props.currentQuestion.skipped
+    ) {
+      // this.leaveOpen();
+    }
+  };
 
   handleOptionChange = changeEvent => {
-    console.log(changeEvent.target.value);
-    this.setState({
-      selectedOption: changeEvent.target.value
+    console.log("option " + changeEvent.target.value);
+    let currentQuestion = this.props.currentQuestion;
+    if (!currentQuestion.complete && !currentQuestion.skipped) {
+      console.log("changing state selectedOption " + changeEvent.target.value);
+      this.setState({
+        selectedOption: changeEvent.target.value
+      });
+    } else {
+      console.log(
+        "not changing " + currentQuestion.complete + currentQuestion.skipped
+      );
+      this.setState({
+        selectedOption: undefined
+      });
+    }
+  };
+
+  commonUpdateSubmit = currentQuestionUpdate => {
+    //
+    const courseCode = this.props.currentQuestion.courseCode;
+    let liveStudentHistoryCopy = deepCopy(this.props.liveStudentHistory);
+    const currentQuestionIndex = liveStudentHistoryCopy.findIndex(question => {
+      console.log(question.qNum);
+      console.log(this.props.currentQuestion.qNum);
+      console.log(question.qNum === this.props.currentQuestion.qNum);
+      return question.qNum === this.props.currentQuestion.qNum;
+    });
+    console.log("currentQuestionIndex: " + currentQuestionIndex);
+    console.log("step 4");
+    console.log(courseCode);
+    console.log(currentQuestionIndex);
+    console.log(liveStudentHistoryCopy[currentQuestionIndex]);
+    liveStudentHistoryCopy[currentQuestionIndex] = currentQuestionUpdate;
+
+    console.log(liveStudentHistoryCopy[currentQuestionIndex]);
+    console.log("liveStudentHistoryCopy is now : ");
+    console.log(liveStudentHistoryCopy);
+    console.log(liveStudentHistoryCopy.length);
+
+    let subscribedAllResponsesCopy = deepCopy(
+      this.props.subscribedAllResponses
+    );
+    let liveAllResponsesCopy = this.props.liveAllResponses.slice();
+    liveAllResponsesCopy.push(currentQuestionUpdate);
+    subscribedAllResponsesCopy[courseCode] = liveAllResponsesCopy;
+
+    console.log("step 5");
+    console.log("update on server");
+    let studentHistoryCopy = deepCopy(this.props.studentHistory);
+
+    const updateHistoryOnServer = async () => {
+      console.log(
+        "studentHistoryCopy and courseCode and studentHistoryCopy[courseCode]"
+      );
+      console.log(studentHistoryCopy);
+      console.log(courseCode);
+      console.log(studentHistoryCopy[courseCode]);
+      studentHistoryCopy[courseCode] = liveStudentHistoryCopy;
+      console.log("studentHistoryCopy is now ");
+      console.log(studentHistoryCopy);
+
+      let data = new FormData();
+      data.append("username", this.props.username);
+      data.append("courseCode", courseCode);
+      data.append("studentHistory", JSON.stringify(studentHistoryCopy));
+      data.append("currentQuestion", JSON.stringify(currentQuestionUpdate));
+      let response = await fetch("/update-student-history", {
+        method: "POST",
+        body: data
+      });
+      let body = await response.text();
+      let parsed = JSON.parse(body);
+      console.log("completed history update?");
+      console.log(parsed);
+    };
+    updateHistoryOnServer(); // To Do: in two places ... student and Overall
+
+    console.log("step 6");
+    console.log("ANSWER-SUBMITTED");
+    console.log("studentHistoryCopy");
+    console.log(studentHistoryCopy);
+    this.props.dispatch({
+      type: "ANSWER-SUBMITTED",
+      payload: {
+        liveStudentHistory: liveStudentHistoryCopy,
+        studentHistory: studentHistoryCopy,
+        currentQuestion: currentQuestionUpdate,
+        subscribedAllResponses: subscribedAllResponsesCopy,
+        liveAllResponses: liveAllResponsesCopy
+      }
     });
   };
 
   submitHandler = formSubmitEvent => {
     formSubmitEvent.preventDefault();
     console.log("answer submitted");
-    const isCorrect = this.state.selectedOption === this.response_correct;
-    console.log("You have submitted:", this.state.selectedOption);
-    console.log("correct?: " + isCorrect);
+    console.log(
+      "response_correct: " + this.props.currentQuestion.response_correct
+    );
+    console.log("submitted: " + this.state.selectedOption);
 
-    // submit answer
-    // update current question
-    // update student history with that current question
-
-    let currentQuestionUpdate = JSON.parse(
-      JSON.stringify(this.currentQuestionStart)
+    console.log(
+      "correct?: " + this.state.selectedOption ===
+        this.props.currentQuestion.response_correct
     );
 
+    let currentQuestionUpdate = deepCopy(this.currentQuestionStart);
     currentQuestionUpdate.response_submitted = this.state.selectedOption;
     currentQuestionUpdate.elapsedTime = this.props.elapsedTime;
     currentQuestionUpdate.dateStamp = new Date().toLocaleString();
     currentQuestionUpdate.complete = true;
+    currentQuestionUpdate.skipped = false;
 
-    console.log("step 2");
-
-    let studentHistoryCopy = JSON.parse(
-      JSON.stringify(this.props.studentHistory)
-    );
-    console.log("step 3");
-    console.log(this.props.studentHistory);
-    console.log(this.courseCode);
-    console.log(this.props.studentHistory[this.courseCode]);
-    console.log(this.props.currentQuestion);
-
-    const currentQuestionIndex = this.props.studentHistory[
-      this.courseCode
-    ].findIndex(question => {
-      console.log(question.qNum);
-      console.log(this.props.currentQuestion.qNum);
-      console.log(question.qNum === this.props.currentQuestion.qNum);
-      return question.qNum === this.props.currentQuestion.qNum;
-    });
-    console.log("step 4");
-    console.log(this.courseCode);
-    console.log(currentQuestionIndex);
-    console.log(studentHistoryCopy[this.courseCode][currentQuestionIndex]);
-    console.log(currentQuestionUpdate);
-
-    studentHistoryCopy[this.courseCode][
-      currentQuestionIndex
-    ] = currentQuestionUpdate;
-    console.log(
-      studentHistoryCopy[this.courseCode.toString()][currentQuestionIndex]
-    );
-    console.log("studentHistoryCopy is now : ");
-    console.log(studentHistoryCopy);
-    console.log("step 5");
-    console.log("SET-STUDENTHISTORY-AND-CURRENT-Q");
-    this.props.dispatch({
-      type: "SET-STUDENTHISTORY-AND-CURRENT-Q",
-      payload: {
-        studentHistoryCopy: studentHistoryCopy,
-        currentQuestion: currentQuestionUpdate
-      }
-    });
+    this.commonUpdateSubmit(currentQuestionUpdate);
   };
 
   skipQuestion = formSubmitEvent => {
     formSubmitEvent.preventDefault();
-    const isCorrect = undefined;
-    console.log("You have skipped quesiton");
-    this.props.dispatch({
-      type: "UPDATE-STUDENT-HISTORY",
-      payload: {
-        studentHistory: this.props.studentHistory,
-        newHistoryItem: {
-          questionCode: this.props.qNumber,
-          responseCorrect: undefined,
-          elapsedTime: this.props.elapsedTime,
-          dateStamp: new Date().toLocaleString(),
-          complete: false
-        }
-      }
+    this.setState({
+      selectedOption: undefined
     });
+    console.log("answer skipped");
+    let currentQuestionUpdate = deepCopy(this.currentQuestionStart);
+    currentQuestionUpdate.response_submitted = undefined;
+    currentQuestionUpdate.elapsedTime = this.props.elapsedTime;
+    currentQuestionUpdate.dateStamp = new Date().toLocaleString();
+    currentQuestionUpdate.complete = false;
+    currentQuestionUpdate.skipped = true;
+    this.commonUpdateSubmit(currentQuestionUpdate);
+  };
+
+  unSkipQuestion = formSubmitEvent => {
+    formSubmitEvent.preventDefault();
+    this.setState({
+      selectedOption: undefined
+    });
+    console.log("answer UNskipped");
+    let currentQuestionUpdate = deepCopy(this.currentQuestionStart);
+    currentQuestionUpdate.response_submitted = undefined;
+    //currentQuestionUpdate.elapsedTime = 0; // let it continue counting without a reset
+    currentQuestionUpdate.dateStamp = undefined;
+    currentQuestionUpdate.complete = false;
+    currentQuestionUpdate.skipped = false;
+    this.commonUpdateSubmit(currentQuestionUpdate);
 
     this.props.dispatch({
-      type: "SET-NEXT-QUESTION",
-      payload: {
-        previousQ: this.props.qNumber,
-        questionVec: this.props.questionVec
-      }
+      type: "SET-TIMER-ON",
+      payload: { timerOn: true }
     });
-
-    this.props.rD.history.push(
-      "/answer-submitted/" + this.props.qNumber + "/" + isCorrect
-    );
   };
 
   render = () => {
-    console.log("rD");
-    console.log(this.props.rD);
-    console.log(this.props.currentQuestion.response_correct);
+    this.currentQuestionStart = JSON.parse(
+      JSON.stringify(this.props.currentQuestion)
+    );
+    this.currentQuestionStart.username = this.props.username;
     const {
       question,
       response_a,
@@ -136,11 +194,13 @@ class Template001 extends Component {
       response_correct,
       complete,
       skipped,
-      response_submitted
+      response_submitted,
+      courseCode,
+      chapter
     } = this.props.currentQuestion;
 
     return (
-      <div className="question template">
+      <div className="question-template">
         <form onSubmit={this.submitHandler}>
           <b>{question}</b>
           <br />
@@ -189,16 +249,39 @@ class Template001 extends Component {
           />
           <label> {response_c}</label>
           <br />
-          <input type="submit" />
+          {!complete && !skipped ? (
+            <button type="submit" className="icon-btn long">
+              {" "}
+              <i className="fas fa-check"></i>
+              <span> Submit</span>
+            </button>
+          ) : (
+            ""
+          )}
         </form>
-        <br />
-        {!complete ? (
+
+        {!complete && !skipped ? (
           <form onSubmit={this.skipQuestion}>
-            <button>Skip Question</button>
+            <button type="submit" className="icon-btn long">
+              {" "}
+              <i className="fas fa-forward"></i>
+              <span> Skip Q</span>
+            </button>
           </form>
         ) : (
-          <div />
+          ""
         )}
+
+        <br />
+        {skipped ? (
+          <button className="icon-btn short" onClick={this.unSkipQuestion}>
+            <i className="fas fa-redo"></i> ReTry
+          </button>
+        ) : (
+          ""
+        )}
+
+        <br />
       </div>
     );
   };
@@ -206,10 +289,16 @@ class Template001 extends Component {
 
 const mapStateToProps = state => {
   return {
-    subscriptions: state.subscriptions,
-    studentHistory: state.studentHistory,
+    username: state.username,
     currentQuestion: state.currentQuestion,
-    elapsedTime: state.elapsedTime
+    currentQuestionUpdate: state.currentQuestionUpdate,
+    elapsedTime: state.elapsedTime,
+    studentHistory: state.studentHistory,
+    liveStudentHistory: state.liveStudentHistory,
+    liveCourseQuestions: state.liveCourseQuestions,
+    liveAllResponses: state.liveAllResponses,
+    subscribedAllResponses: state.subscribedAllResponses,
+    timerOn: state.timerOn
   };
 };
 

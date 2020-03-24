@@ -14,6 +14,9 @@ import Login from "../Login/Login.jsx";
 import Signup from "../Signup/Signup.jsx";
 import Logout from "../Logout/Logout.jsx";
 import MyProfile from "../MyProfile/MyProfile.jsx";
+import Dashboard from "../Dashboard/Dashboard.jsx";
+
+const deepCopy = require("rfdc")(); // a really fast deep copy function
 
 class Routes extends Component {
   constructor() {
@@ -22,15 +25,27 @@ class Routes extends Component {
 
   componentDidMount = () => {
     console.log("MOUNT Routes and Paths");
-    console.log(this.props.studentHistory);
   };
 
+  /*
   componentDidUpdate = () => {
     console.log("UPDATE Routes and Paths");
   };
+  */
+
+  arraysMatch = (arr1, arr2) => {
+    // Check if the arrays are the same length
+    if (arr1.length !== arr2.length) return false;
+    // Check if all items exist and are in the same order
+    for (var i = 0; i < arr1.length; i++) {
+      if (arr1[i] !== arr2[i]) return false;
+    }
+    // Otherwise, return true
+    return true;
+  };
 
   renderLoginSignup = routerData => {
-    console.log("renderLoginSignup");
+    console.log("route LoginSignup");
     if (this.props.username === undefined) {
       return (
         <>
@@ -47,7 +62,7 @@ class Routes extends Component {
   };
 
   renderLogout = routerData => {
-    console.log("render Logout");
+    console.log("route Logout");
     return <Logout rD={routerData} />;
   };
 
@@ -64,109 +79,178 @@ class Routes extends Component {
   };
 
   renderCart = () => {
-    console.log("render cart");
+    console.log("route cart");
     return <Cart />;
   };
 
   renderCheckout = routerData => {
-    console.log("running checkout");
+    console.log("route checkout");
     return <Checkout rD={routerData} />;
   };
 
   renderCourseShelf = routerData => {
-    console.log("render shop");
+    console.log("route shop");
     return <CourseShelf rD={routerData} />;
   };
 
   renderCourseDetail = routerData => {
     let courseCode = routerData.match.params.courseCode;
-    console.log("rendering with " + courseCode);
+    console.log("route CourseDetail with " + courseCode);
     return <CourseDetail courseCode={courseCode} rD={routerData} />;
   };
 
   renderMyProfile = routerData => {
+    console.log("route MyProfile");
     let userId = routerData.match.params.username;
     return <MyProfile rD={routerData} />;
   };
 
   renderCourseRun = routerData => {
-    let courseCode = routerData.match.params.courseCode;
-    console.log("running course " + courseCode);
-    return <CourseRun courseCode={courseCode} />;
+    let proceed = false;
+    let setup = () => {
+      let courseCode = routerData.match.params.courseCode;
+      console.log("route courseRun " + courseCode);
+      const liveCourse = this.props.subscribedCourses[courseCode]; // select the relevant object
+      console.log(liveCourse);
+      const liveStudentHistory = this.props.studentHistory[courseCode]; // work with relevant object
+      console.log(liveStudentHistory);
+      const liveAllResponses = this.props.subscribedAllResponses[courseCode];
+      console.log(liveAllResponses);
+      let liveUnReadQs = liveCourse.questionVec.slice();
+      for (let i = 0; i <= liveStudentHistory.length - 1; i++) {
+        console.log("unread ", liveUnReadQs);
+        let indexOfQ = liveUnReadQs.findIndex(question => {
+          return question.qNum === liveStudentHistory[i].qNum;
+        });
+        liveUnReadQs.splice(indexOfQ, 1);
+      }
+      console.log("dispatch LOAD-LIVE-COURSE");
+      this.props.dispatch({
+        type: "LOAD-LIVE-COURSE",
+        payload: {
+          liveCourseQuestions: liveCourse.questionVec,
+          liveStudentHistory: liveStudentHistory,
+          liveAllResponses: liveAllResponses.responses
+        }
+      });
+
+      if (!this.arraysMatch(liveUnReadQs, this.props.liveStudentUnRead)) {
+        console.log("dispatch UPDATE-UNREAD-Q");
+        this.props.dispatch({
+          type: "UPDATE-UNREAD-Q",
+          payload: {
+            liveStudentUnRead: liveUnReadQs
+          }
+        });
+      }
+    };
+    setup();
+    if (true) return <CourseRun rD={routerData} />;
   };
 
   renderQuestion = routerData => {
-    let courseCode = routerData.match.params.courseCode;
-    let qNumber = routerData.match.params.qNum;
-    let currentQuestion = {};
-    // if question is not in your history, put it in your history
-    console.log("render question");
-    console.log(courseCode);
-    console.log("studentHistory");
-    console.log(this.props.studentHistory);
-    currentQuestion = this.props.studentHistory[courseCode].find(question => {
-      return question.qNum.toString() === qNumber;
-    });
-    if (!currentQuestion) {
-      console.log("this.props.subscribedCourses[courseCode]");
-      console.log(this.props.subscribedCourses);
-      console.log(this.props.subscribedCourses[courseCode]);
+    let proceed = false;
+    const arraysMatch = (arr1, arr2) => {
+      // Check if the arrays are the same length
+      if (arr1.length !== arr2.length) return false;
+      // Check if all items exist and are in the same order
+      for (var i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+      }
+      // Otherwise, return true
+      return true;
+    };
+    let indexOfQ;
+
+    const setup = () => {
+      let courseCode = routerData.match.params.courseCode;
+      let qNumber = routerData.match.params.qNum;
+      console.log("route Question");
+      console.log(courseCode);
       console.log(qNumber);
-      currentQuestion = this.props.subscribedCourses[
-        courseCode
-      ].questionVec.find(question => {
-        return question.qNum.toString() === qNumber;
+      console.log("loading from studenthistory?");
+      let liveStudentHistoryCopy = this.props.liveStudentHistory.slice();
+
+      indexOfQ = liveStudentHistoryCopy.findIndex(question => {
+        return question.qNum === qNumber;
       });
-      console.log("currentQuestion");
+      console.log("indexOfQ is " + indexOfQ);
+      let currentQuestion = null;
+      if (indexOfQ > -1) {
+        currentQuestion = liveStudentHistoryCopy[indexOfQ];
+      }
+      /*
+      let currentQuestion = liveStudentHistoryCopy.find(question => {
+        return question.qNum === qNumber;
+      });
+      */
+      console.log("liveStudentHistory and Copy and currentQuestion");
+      console.log(this.props.liveStudentHistory);
+      console.log(liveStudentHistoryCopy);
       console.log(currentQuestion);
-      console.log("and now this");
-      let studentHistoryCopy = JSON.parse(
-        JSON.stringify(this.props.studentHistory)
-      );
-      console.log(studentHistoryCopy);
-      console.log(studentHistoryCopy[courseCode]);
-      console.log(studentHistoryCopy[courseCode].slice());
-      let courseSlice = studentHistoryCopy[courseCode].slice();
-      console.log("courseSlice");
-      console.log(courseSlice);
-      courseSlice.push(currentQuestion);
-      console.log("courseSlice");
-      console.log(courseSlice);
-      studentHistoryCopy[courseCode] = courseSlice;
-      console.log("studentHistoryCopy");
-      console.log(studentHistoryCopy);
-      console.log("about to Dispatch");
-      console.log("SET-STUDENTHISTORY-AND-CURRENT-Q");
-      this.props.dispatch({
-        type: "SET-STUDENTHISTORY-AND-CURRENT-Q",
-        payload: {
-          studentHistoryCopy: studentHistoryCopy,
-          currentQuestion: currentQuestion
-        }
-      });
-    } else {
-      console.log("SET-CURRENT-QUESTION");
-      this.props.dispatch({
-        type: "SET-CURRENT-QUESTION",
-        payload: { currentQuestion: currentQuestion }
-      });
-    }
-    console.log("about to return AskQ from routes");
-    console.log(currentQuestion);
-    return <AskQ rD={routerData} />;
+      if (!currentQuestion) {
+        console.log("picking up from course");
+        let currentQuestion = this.props.liveCourseQuestions.find(question => {
+          return question.qNum.toString() === qNumber;
+        });
+        liveStudentHistoryCopy.push(currentQuestion);
+        console.log("currentQuestion and liveStudentHistory and Copy");
+        console.log(this.props.liveStudentHistory);
+        console.log(currentQuestion);
+        console.log(liveStudentHistoryCopy);
+      }
+      if (
+        !(
+          currentQuestion === this.props.currentQuestion &&
+          arraysMatch(liveStudentHistoryCopy, this.props.liveStudentHistory)
+        )
+      ) {
+        console.log(
+          "going to dispatch SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY"
+        );
+        console.log(currentQuestion);
+        console.log(this.props.currentQuestion);
+        console.log(currentQuestion === this.props.currentQuestion);
+        console.log(liveStudentHistoryCopy);
+        console.log(this.props.liveStudentHistory);
+        console.log(
+          arraysMatch(liveStudentHistoryCopy, this.props.liveStudentHistory)
+        );
+
+        //remove currentQuestion from liveStudentUnRead array? Maybe I can let this be done in CourseRun
+        /*console.log("liveStudentUnRead ");
+        console.log(this.props.liveStudentUnRead);
+        let liveUnReadQs = this.props.liveStudentUnRead.slice();
+        console.log("liveUnReadQs");
+        console.log(liveUnReadQs);
+        let idx = liveUnReadQs.findIndex(question => {
+          return question.qNum === this.props.currentQuestion.qNum;
+        });
+        liveUnReadQs.splice(idx, 1);
+        console.log("liveUnReadQs");
+        console.log(liveUnReadQs);
+        */
+        this.props.dispatch({
+          type: "SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY",
+          payload: {
+            currentQuestion: currentQuestion,
+            //liveStudentUnRead: liveUnReadQs,
+            liveStudentHistory: liveStudentHistoryCopy
+          }
+        });
+      } else {
+        console.log("about to return AskQ from routes");
+        console.log(this.props.currentQuestion);
+        proceed = true;
+      }
+    };
+
+    setup();
+    if (proceed) return <AskQ rD={routerData} indexOfQ={indexOfQ} />;
   };
 
-  renderAnswerSubmitted = routerData => {
-    let qNumber = routerData.match.params.qNum;
-    let isCorrect = routerData.match.params.isCorrect === "true";
-    console.log("answered question " + qNumber);
-    return (
-      <AnswerSubmitted
-        qNumber={qNumber}
-        isCorrect={isCorrect}
-        rD={routerData}
-      />
-    );
+  renderDashboard = () => {
+    return <Dashboard />;
   };
 
   render = () => {
@@ -198,11 +282,7 @@ class Routes extends Component {
           path="/question/:courseCode/:qNum"
           render={this.renderQuestion}
         />
-        <Route
-          exact={true}
-          path="/answer-submitted/:qNum/:isCorrect"
-          render={this.renderAnswerSubmitted}
-        />
+        <Route exact={true} path="/dashboard/" render={this.renderDashboard} />
       </>
     );
   };
@@ -213,7 +293,12 @@ const mapStateToProps = state => {
     loggedIn: state.loggedIn,
     username: state.username,
     subscribedCourses: state.subscribedCourses,
-    studentHistory: state.studentHistory
+    studentHistory: state.studentHistory,
+    liveStudentHistory: state.liveStudentHistory,
+    liveCourseQuestions: state.liveCourseQuestions,
+    liveStudentUnRead: state.liveStudentUnRead,
+    currentQuestion: state.currentQuestion,
+    subscribedAllResponses: state.subscribedAllResponses
   }; // THIS WILL CHANGE
 };
 

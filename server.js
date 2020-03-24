@@ -97,6 +97,7 @@ app.post("/login", upload.none(), async (req, res) => {
         // depending what the user has subscribed to.
 
         let subscribedCoursesTemp = {};
+        let subscribedAllResponsesTemp = {};
         const subscriptionKeys = Object.keys(user.subscriptions);
 
         const asyncForeach = async (array, callback) => {
@@ -113,7 +114,7 @@ app.post("/login", upload.none(), async (req, res) => {
           console.log("ok2");
           const course = await dbo
             .collection("courses")
-            .findOne({ courseCode: Number(x) });
+            .findOne({ courseCode: x });
           console.log("ok3");
           console.log(x);
           console.log(course);
@@ -122,11 +123,27 @@ app.post("/login", upload.none(), async (req, res) => {
           console.log(subscribedCoursesTemp);
         };
 
+        const loadResponseVec = async x => {
+          console.log("ok4");
+          const responseVec = await dbo
+            .collection("responses")
+            .findOne({ courseCode: x });
+          console.log("ok3");
+          console.log(x);
+          console.log(responseVec);
+          subscribedAllResponsesTemp[x] = responseVec;
+          console.log("subscribedAllResponses");
+          console.log(subscribedAllResponsesTemp);
+        };
+
         const finalBuild = async () => {
           console.log("ok1");
           await asyncForeach(subscriptionKeys, loadCourse);
-          console.log("done");
+          console.log("done loadCourse");
           returnObject.subscribedCourses = subscribedCoursesTemp;
+          await asyncForeach(subscriptionKeys, loadResponseVec);
+          console.log("done loadResponseVec");
+          returnObject.subscribedAllResponses = subscribedAllResponsesTemp;
           return res.send(JSON.stringify(returnObject));
         };
 
@@ -151,10 +168,11 @@ app.post("/signup", upload.none(), async (req, res) => {
     username: name,
     password: pwd,
     cart: [],
-    studentHistory: [],
-    subscriptions: [],
-    subscribedCourses: [],
-    subscriptionSettings: []
+    studentHistory: {},
+    subscriptions: {},
+    subscribedCourses: {},
+    subscriptionSettings: {},
+    subscribedAllResponses: {}
   });
   console.log("signup success");
   let sessionId = generateId();
@@ -285,6 +303,89 @@ app.post("/record-purchased-course/", upload.none(), async (req, res) => {
   );
   console.log("db updated with new subscriptions for " + name);
   return res.send(JSON.stringify({ success: true }));
+});
+
+app.post("/update-student-history/", upload.none(), async (req, res) => {
+  console.log("update student history on Server");
+  let name = req.body.username;
+  let courseCode = req.body.courseCode;
+  let currentQuestion = JSON.parse(req.body.currentQuestion);
+  console.log("name is " + name);
+  let studentHistory = JSON.parse(req.body.studentHistory);
+  console.log(studentHistory);
+
+  await dbo.collection("users").updateOne(
+    { username: name },
+    {
+      $set: {
+        studentHistory: studentHistory
+      }
+    }
+  );
+  console.log("db updated with new studentHistory for " + name);
+
+  let allResponses;
+
+  const updateAllResponses = async () => {
+    //
+  };
+
+  await dbo
+    .collection("responses")
+    .findOne({ courseCode: courseCode }, async (err, response) => {
+      if (err) {
+        console.log("/update error error");
+        return res.send(JSON.stringify({ success: false, msg: "db err" }));
+      }
+      if (response === null) {
+        console.log("response === null ... no courseCode match");
+        return res.send(
+          JSON.stringify({ success: false, msg: "courseCode null" })
+        );
+      } else {
+        console.log("update success");
+        allResponses = response.allResponses;
+        console.log("success : ", response);
+      }
+
+      console.log(allResponses);
+      console.log(currentQuestion.qNum);
+
+      let indexOfQ = allResponses.findIndex(response => {
+        console.log("comparison");
+        console.log(response.qNum);
+        currentQuestion.qNum;
+        return response.qNum === currentQuestion.qNum;
+      });
+
+      if (indexOfQ > -1) {
+        console.log("splicing");
+        console.log(indexOfQ);
+        console.log(currentQuestion);
+        allResponses.splice(indexOfQ, 1);
+      }
+
+      allResponses.push(currentQuestion);
+      console.log("new allResponses");
+      console.log(allResponses);
+      console.log("update allResponses on Server");
+
+      await dbo.collection("responses").updateOne(
+        { courseCode: courseCode },
+        {
+          $set: {
+            allResponses: allResponses
+          }
+        }
+      );
+      console.log(
+        "db updated with new studentHistory for " +
+          name +
+          " and allResponses for courseCode " +
+          courseCode
+      );
+      return res.send(JSON.stringify({ success: true }));
+    });
 });
 
 // Your endpoints go before this line

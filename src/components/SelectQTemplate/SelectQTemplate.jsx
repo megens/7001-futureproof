@@ -9,8 +9,12 @@ class SelectQTemplate extends Component {
     super();
   }
 
-  componentDidUpdate = () => {
+  componentDidMount = () => {
     console.log("MOUNT SelectQTemplate");
+  };
+
+  componentDidUpdate = () => {
+    console.log("UPDATE SelectQTemplate");
   };
 
   render = () => {
@@ -24,12 +28,16 @@ class SelectQTemplate extends Component {
       case "Template001": {
         console.log("template001");
 
-        return <Template001 rD={this.props.rD} />;
+        return (
+          <Template001 rD={this.props.rD} indexOfQ={this.props.indexOfQ} />
+        );
       }
 
       case "Template002": {
         console.log("template002");
-        return <Template002 rD={this.props.rD} />;
+        return (
+          <Template002 rD={this.props.rD} indexOfQ={this.props.indexOfQ} />
+        );
       }
 
       default:

@@ -75,6 +75,33 @@ img {
   min-height: 450px;
 }
 
+.course-container {
+  display: flex;
+  width: 100%;
+}
+
+.red {
+  color: red;
+}
+.skipped {
+  font-weight: bold;
+  color: red;
+}
+.wide {
+  width: 100%;
+}
+
+.question-box {
+  border: 2px solid var(--banner-bg-color);
+  border-radius: 8px;
+  padding: 5px;
+  margin: 5px;
+  width: 98%;
+}
+
+.question-template {
+  width: 100%;
+}
 .top-left > div {
   margin: 10px;
   margin-left: 30px;
@@ -412,7 +439,6 @@ input[type="number"] {
   color: white;
   background-color: white;
   color: var(--banner-bg-color);
-  border: none;
   border-radius: 8px;
   border: 2px solid;
   padding: 5px;
@@ -435,6 +461,13 @@ input[type="number"] {
 .icon-btn:hover {
   color: white;
   background-color: var(--banner-bg-color);
+}
+
+#switch-color {
+  color: white;
+  background-color: var(--banner-bg-color);
+  border-radius: 8px;
+  border: 2px solid var(--banner-bg-color);
 }
 
 .short {

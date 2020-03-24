@@ -12,7 +12,8 @@ function reducer(state, action) {
         studentHistory: action.payload.studentHistory,
         subscriptions: action.payload.subscriptions,
         subscribedCourses: action.payload.subscribedCourses,
-        subscriptionSettings: action.payload.subscriptionSettings
+        subscriptionSettings: action.payload.subscriptionSettings,
+        subscribedAllResponses: action.payload.subscribedAllResponses
       };
     }
 
@@ -73,13 +74,43 @@ function reducer(state, action) {
       };
     }
 
-    case "SET-STUDENTHISTORY-AND-CURRENT-Q": {
+    case "SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY": {
       // adding a new question to history via renderQuestion on RoutesAndPaths.jsx
-      console.log("SET-STUDENTHISTORY-AND-CURRENT-Q");
+      console.log("SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY");
+      console.log("payload");
+      console.log(action.payload.currentQuestion);
+      console.log(action.payload.liveStudentHistory);
       return {
         ...state,
-        studentHistory: action.payload.studentHistoryCopy,
-        currentQuestion: action.payload.currentQuestion
+        currentQuestion: action.payload.currentQuestion,
+        liveStudentHistory: action.payload.liveStudentHistory
+        //liveStudentUnRead: action.payload.liveStudentUnRead
+      };
+    }
+
+    case "UPDATE-UNREAD-Q": {
+      return {
+        ...state,
+        liveStudentUnRead: action.payload.liveStudentUnRead
+      };
+    }
+
+    case "ANSWER-SUBMITTED": {
+      // adding a new question to history via renderQuestion on RoutesAndPaths.jsx
+      console.log("inside ANSWER-SUBMITTED");
+      console.log("payload");
+      console.log(action.payload.currentQuestion);
+      console.log(action.payload.liveStudentHistory);
+      console.log(action.payload.studentHistory);
+      console.log(action.payload.subscribedAllResponses);
+      console.log(action.payload.liveAllResponses);
+      return {
+        ...state,
+        currentQuestion: action.payload.currentQuestion,
+        liveStudentHistory: action.payload.liveStudentHistory,
+        studentHistory: action.payload.studentHistory,
+        subscribedAllResponses: action.payload.subscribedAllResponses,
+        liveAllResponses: action.payload.liveAllResponses
       };
     }
 
@@ -97,6 +128,23 @@ function reducer(state, action) {
       //
     }
 
+    case "REMOVE-Q": {
+      console.log("in REMOVE-Q");
+      return {
+        ...state,
+        liveStudentHistory: action.payload.liveStudentHistory,
+        studentHistory: action.payload.studentHistory,
+        currentQuestion: action.payload.currentQuestion
+      };
+    }
+
+    case "SET-TIMER-ON": {
+      return {
+        ...state,
+        timerOn: action.payload.timerOn
+      };
+    }
+
     case "SET-ANSWER-TIME": {
       return {
         ...state,
@@ -105,10 +153,13 @@ function reducer(state, action) {
     }
 
     case "LOAD-LIVE-COURSE": {
+      console.log("LOAD-LIVE-COURSE");
       return {
         ...state,
         liveCourseQuestions: action.payload.liveCourseQuestions,
-        liveStudentHistory: action.payload.liveStudentHistory
+        liveStudentHistory: action.payload.liveStudentHistory,
+        currentQuestion: action.payload.liveCourseQuestions.slice(-1)[0]
+        //liveStudentUnRead: action.payload.liveStudentUnRead
       };
     }
 
@@ -131,16 +182,21 @@ const store = createStore(
     subscribedCourses: {}, // array of course objects
     purchaseItem: {}, // course object
     currentCourseRun: {}, // current course object
-    liveCourseQuestions: [{ qNum: 0 }], // array of questions (one array from subscribedCourses)
+    liveCourseQuestions: [{ qNum: 0 }, { qNum: 1 }], // array of questions (one array from subscribedCourses)
     liveStudentHistory: [], // array of studentHistory (one array from studentHistory)
-    nextQuestion: "101-0001", // string
+    liveStudentUnRead: [], // at courseRun, populate the difference from liveCourseQuestions and liveStudentHistory
     elapsedTime: 0, // seconds spent on question
+    timerOn: true, // global state so different components can influence
     currentQuestion: {
       // THIS SHOULD BE PART OF VEC?
+      qNum: 0,
       complete: undefined, // could be true, false, undefined (=== skipped)
       isCorrect: undefined, // true , false, undefined
       elapsedTime: 0 // seconds
-    }
+    },
+    currentQuestionUpdate: {},
+    subscribedAllResponses: {},
+    liveAllResponses: []
   },
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );

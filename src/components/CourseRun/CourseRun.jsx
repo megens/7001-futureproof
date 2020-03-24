@@ -8,30 +8,49 @@ class CourseRun extends Component {
   }
 
   componentDidMount = () => {
-    console.log("courseCode");
-    console.log(this.props.courseCode);
-    console.log("subscribedCourses");
-    console.log(this.props.subscribedCourses);
-
-    const liveCourse = this.props.subscribedCourses[this.props.courseCode]; // select the relevant object
-    const liveStudentHistory = this.props.studentHistory[this.props.courseCode]; // work with relevant object
-    this.props.dispatch({
-      type: "LOAD-LIVE-COURSE",
-      payload: {
-        liveCourseQuestions: liveCourse.questionVec,
-        liveStudentHistory: liveStudentHistory
-      }
-    });
-    console.log("liveCourseQuestions");
-    console.log(liveCourse.questionVec);
+    console.log("MOUNT courseRun");
   };
 
   componentDidUpdate = () => {
-    console.log("CourseRun");
+    console.log("UPDATE CourseRun");
+  };
+
+  newQuestion = () => {
+    console.log("new Question");
+    let liveStudentUnReadCopy = this.props.liveStudentUnRead.slice();
+    let newQ;
+    let newQNum;
+    if (this.props.liveStudentUnRead.length === 0) {
+      console.log("UnRead is empty ... take new Q from history");
+      newQ = this.props.liveStudentHistory[
+        this.props.liveStudentHistory.length - 1
+      ];
+      newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
+    } else {
+      console.log("taking new Q from UnRead");
+      newQ = this.props.liveStudentUnRead[0];
+      newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
+      console.log(newQNum);
+      // in case we change the index from 0 to something more general ...
+      let idx = liveStudentUnReadCopy.findIndex(question => {
+        return question.qNum === newQ.qNum;
+      });
+      liveStudentUnReadCopy.splice(idx, 1);
+      this.props.dispatch({
+        type: "UPDATE-UNREAD-Q",
+        payload: { liveStudentUnRead: liveStudentUnReadCopy }
+      });
+    }
+    this.props.rD.history.push("/question/" + newQNum);
   };
 
   render = () => {
-    console.log("courseRun" + this.props.courseCode);
+    console.log("render CourseRun");
+
+    console.log("liveCourseQuestions");
+    console.log(this.props.liveCourseQuestions);
+    console.log(this.props.liveCourseQuestions[0]);
+    console.log(this.props.liveCourseQuestions[1]);
 
     return (
       <div>
@@ -47,6 +66,12 @@ class CourseRun extends Component {
             <span> Home</span>
           </button>
         </Link>
+        <br />
+
+        <button className="icon-btn long" id="switch-color">
+          <i className="fas fa-compass"></i>
+          <span> {this.props.liveCourseQuestions[0].courseCode}</span>
+        </button>
         <br />
 
         <Link to={"/settings/" + this.props.username}>
@@ -65,19 +90,11 @@ class CourseRun extends Component {
         </Link>
         <br />
 
-        <Link
-          to={
-            "/question/" +
-            this.props.courseCode +
-            "/" +
-            this.props.liveCourseQuestions[0].qNum // change this ref!
-          }
-        >
-          <button className="icon-btn long">
-            <i className="fas fa-question"></i>
-            <span> Quiz Me</span>
-          </button>
-        </Link>
+        <button className="icon-btn long" onClick={this.newQuestion}>
+          <i className="fas fa-question"></i>
+          <span> Quiz Me</span>
+        </button>
+
         <br />
 
         <Link to={"/dashboard/"}>
@@ -100,9 +117,9 @@ class CourseRun extends Component {
 const mapStateToProps = state => {
   return {
     username: state.username,
-    subscribedCourses: state.subscribedCourses,
     liveCourseQuestions: state.liveCourseQuestions,
-    studentHistory: state.studentHistory
+    liveStudentUnRead: state.liveStudentUnRead,
+    liveStudentHistory: state.liveStudentHistory
   };
 };
 
