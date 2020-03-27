@@ -17,7 +17,6 @@ import Logout from "../Logout/Logout.jsx";
 import MyProfile from "../MyProfile/MyProfile.jsx";
 import Dashboard from "../Dashboard/Dashboard.jsx";
 
-let isEqual = require("lodash.isequal");
 const deepCopy = require("rfdc")(); // a really fast deep copy function
 
 class Routes extends Component {
@@ -37,10 +36,10 @@ class Routes extends Component {
 
   arraysMatch = (arr1, arr2) => {
     // Check if the arrays are the same length
-    if (!arr1.length === arr2.length) return false;
-    // Check if all items exist and are in the same order // SHOULD USE LODASH ISEQUAL?
+    if (arr1.length !== arr2.length) return false;
+    // Check if all items exist and are in the same order
     for (var i = 0; i < arr1.length; i++) {
-      if (!isEqual(arr1[i], arr2[i])) return false;
+      if (arr1[i] !== arr2[i]) return false;
     }
     // Otherwise, return true
     return true;
@@ -126,21 +125,13 @@ class Routes extends Component {
         });
         liveUnReadQs.splice(indexOfQ, 1);
       }
-
-      let newQ = liveUnReadQs[0]; // a default POTENTIAL next Q if requested
-      if (!newQ) {
-        newQ = liveStudentHistory[liveStudentHistory.length - 1];
-      }
-      const newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
-
       console.log("dispatch LOAD-LIVE-COURSE");
       this.props.dispatch({
         type: "LOAD-LIVE-COURSE",
         payload: {
           liveCourseQuestions: liveCourse.questionVec,
           liveStudentHistory: liveStudentHistory,
-          liveAllResponses: liveAllResponses.responses,
-          newQNum: newQNum
+          liveAllResponses: liveAllResponses.responses
         }
       });
 
@@ -163,114 +154,104 @@ class Routes extends Component {
   };
 
   renderQuestion = routerData => {
-    let courseCode = routerData.match.params.courseCode;
-    let qNumber = routerData.match.params.qNum;
     let proceed = false;
-    let currentQuestion = null;
+    const arraysMatch = (arr1, arr2) => {
+      // Check if the arrays are the same length
+      if (arr1.length !== arr2.length) return false;
+      // Check if all items exist and are in the same order
+      for (var i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+      }
+      // Otherwise, return true
+      return true;
+    };
     let indexOfQ;
-    //is the question in studentHistory?
-    console.log("try loading from studenthistory?");
-    let liveStudentHistoryCopy = this.props.liveStudentHistory.slice();
-    let liveStudentUnReadCopy = this.props.liveStudentUnRead.slice();
 
-    indexOfQ = liveStudentHistoryCopy.findIndex(question => {
-      return question.qNum === qNumber;
-    });
-    if (indexOfQ > -1) {
-      // question is in studentHistory
-    } else {
-      let pushQuestion = this.props.liveCourseQuestions.find(question => {
-        return question.qNum.toString() === qNumber;
+    const setup = () => {
+      let courseCode = routerData.match.params.courseCode;
+      let qNumber = routerData.match.params.qNum;
+      console.log("route Question");
+      console.log(courseCode);
+      console.log(qNumber);
+      console.log("loading from studenthistory?");
+      let liveStudentHistoryCopy = this.props.liveStudentHistory.slice();
+
+      indexOfQ = liveStudentHistoryCopy.findIndex(question => {
+        return question.qNum === qNumber;
       });
-      liveStudentHistoryCopy.push(pushQuestion);
-    }
-    indexOfQ = liveStudentHistoryCopy.findIndex(question => {
-      return question.qNum === qNumber;
-    });
-    currentQuestion = liveStudentHistoryCopy[indexOfQ];
-    console.log(currentQuestion);
-
-    console.log("liveStudentUnReadCopy");
-    console.log(liveStudentUnReadCopy);
-    console.log(liveStudentUnReadCopy[0]);
-    // remove the rendered Question from unRead
-    let idx = liveStudentUnReadCopy.findIndex(question => {
-      console.log(question.qNum);
-      console.log(currentQuestion.qNum);
-      return question.qNum === currentQuestion.qNum;
-    });
-    console.log("idx is " + idx);
-    if (idx > -1) {
-      console.log("removing currentQuestion from UnRead");
-      liveStudentUnReadCopy.splice(idx, 1);
-    } else {
-      console.log("not removing currentQuestion from UnRead");
-    }
-    console.log("and now");
-    console.log(liveStudentUnReadCopy);
-    // set the nextNewQ
-    let nextNewQ;
-    if (!(liveStudentUnReadCopy.length === 0)) {
-      console.log("nextNewQ coming from UnRead");
-      nextNewQ = liveStudentUnReadCopy[0];
-    } // in the absence of a more refined algorithm}
-    else {
-      console.log(
-        "nextNewQ coming last of history ... out of UnRead which has length " +
-          liveStudentUnReadCopy.length
-      );
-      nextNewQ = liveStudentHistoryCopy[liveStudentHistoryCopy.length - 1];
-    }
-    const nextNewQNum = "" + nextNewQ.courseCode + "/" + nextNewQ.qNum;
-    console.log("nextNewQNum is " + nextNewQNum);
-
-    const dispatchCurrentQuestion = !isEqual(
-      // lodash equality fn
-      currentQuestion,
-      this.props.currentQuestion
-    );
-    const dispatchLiveStudentHistory = !this.arraysMatch(
-      liveStudentHistoryCopy,
-      this.props.liveStudentHistory
-    );
-    const dispatchLiveStudentUnRead = !this.arraysMatch(
-      liveStudentUnReadCopy,
-      this.props.liveStudentUnRead
-    );
-    const dispatchNewQNum = !(nextNewQNum === this.props.newQNum);
-
-    console.log(
-      "dispatch? " +
-        dispatchCurrentQuestion +
-        " " +
-        dispatchLiveStudentHistory +
-        " " +
-        dispatchLiveStudentUnRead +
-        " " +
-        dispatchNewQNum
-    );
-    if (
-      dispatchCurrentQuestion ||
-      dispatchLiveStudentHistory ||
-      dispatchLiveStudentUnRead ||
-      dispatchNewQNum
-    ) {
-      console.log("going to SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY");
-      this.props.dispatch({
-        type: "SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY",
-        payload: {
-          currentQuestion: currentQuestion,
-          liveStudentHistory: liveStudentHistoryCopy,
-          liveStudentUnRead: liveStudentUnReadCopy,
-          newQNum: nextNewQNum
-        }
+      console.log("indexOfQ is " + indexOfQ);
+      let currentQuestion = null;
+      if (indexOfQ > -1) {
+        currentQuestion = liveStudentHistoryCopy[indexOfQ];
+      }
+      /*
+      let currentQuestion = liveStudentHistoryCopy.find(question => {
+        return question.qNum === qNumber;
       });
-    } else {
-      proceed = true;
-    }
+      */
+      console.log("liveStudentHistory and Copy and currentQuestion");
+      console.log(this.props.liveStudentHistory);
+      console.log(liveStudentHistoryCopy);
+      console.log(currentQuestion);
+      if (!currentQuestion) {
+        console.log("picking up from course");
+        let currentQuestion = this.props.liveCourseQuestions.find(question => {
+          return question.qNum.toString() === qNumber;
+        });
+        liveStudentHistoryCopy.push(currentQuestion);
+        console.log("currentQuestion and liveStudentHistory and Copy");
+        console.log(this.props.liveStudentHistory);
+        console.log(currentQuestion);
+        console.log(liveStudentHistoryCopy);
+      }
+      if (
+        !(
+          currentQuestion === this.props.currentQuestion &&
+          arraysMatch(liveStudentHistoryCopy, this.props.liveStudentHistory)
+        )
+      ) {
+        console.log(
+          "going to dispatch SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY"
+        );
+        console.log(currentQuestion);
+        console.log(this.props.currentQuestion);
+        console.log(currentQuestion === this.props.currentQuestion);
+        console.log(liveStudentHistoryCopy);
+        console.log(this.props.liveStudentHistory);
+        console.log(
+          arraysMatch(liveStudentHistoryCopy, this.props.liveStudentHistory)
+        );
+
+        //remove currentQuestion from liveStudentUnRead array? Maybe I can let this be done in CourseRun
+        /*console.log("liveStudentUnRead ");
+        console.log(this.props.liveStudentUnRead);
+        let liveUnReadQs = this.props.liveStudentUnRead.slice();
+        console.log("liveUnReadQs");
+        console.log(liveUnReadQs);
+        let idx = liveUnReadQs.findIndex(question => {
+          return question.qNum === this.props.currentQuestion.qNum;
+        });
+        liveUnReadQs.splice(idx, 1);
+        console.log("liveUnReadQs");
+        console.log(liveUnReadQs);
+        */
+        this.props.dispatch({
+          type: "SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY",
+          payload: {
+            currentQuestion: currentQuestion,
+            //liveStudentUnRead: liveUnReadQs,
+            liveStudentHistory: liveStudentHistoryCopy
+          }
+        });
+      } else {
+        console.log("about to return AskQ from routes");
+        console.log(this.props.currentQuestion);
+        proceed = true;
+      }
+    };
+
+    setup();
     if (proceed) return <AskQ rD={routerData} indexOfQ={indexOfQ} />;
-
-    // to add here, when rendering a question tee up the next newQNum (if available), and affect the unReadQs
   };
 
   renderDashboard = routerData => {
@@ -311,7 +292,6 @@ class Routes extends Component {
           path="/question/:courseCode/:qNum"
           render={this.renderQuestion}
         />
-
         <Route exact={true} path="/dashboard/" render={this.renderDashboard} />
       </>
     );
@@ -328,8 +308,7 @@ const mapStateToProps = state => {
     liveCourseQuestions: state.liveCourseQuestions,
     liveStudentUnRead: state.liveStudentUnRead,
     currentQuestion: state.currentQuestion,
-    subscribedAllResponses: state.subscribedAllResponses,
-    newQNum: state.newQNum
+    subscribedAllResponses: state.subscribedAllResponses
   }; // THIS WILL CHANGE
 };
 

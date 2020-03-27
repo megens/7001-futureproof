@@ -4,6 +4,7 @@ import { createStore } from "redux";
 function reducer(state, action) {
   switch (action.type) {
     case "LOGIN-SUCCESS": {
+      console.log("in dispatch LOGIN-SUCCESS");
       return {
         ...state,
         loggedIn: true,
@@ -18,6 +19,7 @@ function reducer(state, action) {
     }
 
     case "LOGOUT": {
+      console.log("in dispatch LOGOUT");
       return {
         ...state,
         loggedIn: false,
@@ -31,6 +33,7 @@ function reducer(state, action) {
     }
 
     case "LOAD-COURSES": {
+      console.log("in dispatch LOAD-COURSES");
       return {
         ...state,
         courseList: action.payload.courseList
@@ -38,6 +41,7 @@ function reducer(state, action) {
     }
 
     case "SET-PURCHASE-ITEM": {
+      console.log("in dispatch SET-PURCHASE-ITEM");
       return {
         ...state,
         purchaseItem: action.payload.purchaseItem
@@ -45,6 +49,7 @@ function reducer(state, action) {
     }
 
     case "NEW-PURCHASE": {
+      console.log("in dispatch NEW-PURCHASE");
       let newCourseCode = action.payload.selectedProduct.courseCode;
       let newSubscriptions = JSON.parse(
         JSON.stringify(action.payload.subscriptions)
@@ -76,19 +81,23 @@ function reducer(state, action) {
 
     case "SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY": {
       // adding a new question to history via renderQuestion on RoutesAndPaths.jsx
-      console.log("SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY");
+      console.log("in dispatch SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY");
       console.log("payload");
       console.log(action.payload.currentQuestion);
       console.log(action.payload.liveStudentHistory);
+      console.log(action.payload.liveStudentUnRead);
+      console.log(action.payload.newQNum);
       return {
         ...state,
         currentQuestion: action.payload.currentQuestion,
-        liveStudentHistory: action.payload.liveStudentHistory
-        //liveStudentUnRead: action.payload.liveStudentUnRead
+        liveStudentHistory: action.payload.liveStudentHistory,
+        liveStudentUnRead: action.payload.liveStudentUnRead,
+        newQNum: action.payload.newQNum
       };
     }
 
     case "UPDATE-UNREAD-Q": {
+      console.log("in dispatch UPDATE-UNREAD-Q");
       return {
         ...state,
         liveStudentUnRead: action.payload.liveStudentUnRead
@@ -97,7 +106,7 @@ function reducer(state, action) {
 
     case "ANSWER-SUBMITTED": {
       // adding a new question to history via renderQuestion on RoutesAndPaths.jsx
-      console.log("inside ANSWER-SUBMITTED");
+      console.log("in dispatch ANSWER-SUBMITTED");
       console.log("payload");
       console.log(action.payload.currentQuestion);
       console.log(action.payload.liveStudentHistory);
@@ -116,7 +125,7 @@ function reducer(state, action) {
 
     case "SET-CURRENT-QUESTION": {
       // adding a new question to history via renderQuestion on RoutesAndPaths.jsx
-      console.log("SET-CURRENT-QUESTION");
+      console.log("in dispatch SET-CURRENT-QUESTION");
       return {
         ...state,
         currentQuestion: action.payload.currentQuestion,
@@ -129,7 +138,7 @@ function reducer(state, action) {
     }
 
     case "REMOVE-Q": {
-      console.log("in REMOVE-Q");
+      console.log("in dispatch REMOVE-Q");
       return {
         ...state,
         liveStudentHistory: action.payload.liveStudentHistory,
@@ -139,6 +148,7 @@ function reducer(state, action) {
     }
 
     case "SET-TIMER-ON": {
+      console.log("in dispatch SET-TIMER-ON");
       return {
         ...state,
         timerOn: action.payload.timerOn
@@ -146,6 +156,7 @@ function reducer(state, action) {
     }
 
     case "SET-ANSWER-TIME": {
+      console.log("in dispatch SET-ANSWER-TIME");
       return {
         ...state,
         elapsedTime: action.payload
@@ -153,13 +164,22 @@ function reducer(state, action) {
     }
 
     case "LOAD-LIVE-COURSE": {
-      console.log("LOAD-LIVE-COURSE");
+      console.log("in dispatch LOAD-LIVE-COURSE");
       return {
         ...state,
         liveCourseQuestions: action.payload.liveCourseQuestions,
         liveStudentHistory: action.payload.liveStudentHistory,
-        currentQuestion: action.payload.liveCourseQuestions.slice(-1)[0]
+        newQNum: action.payload.newQNum
+        //currentQuestion: action.payload.liveCourseQuestions.slice(-1)[0]
         //liveStudentUnRead: action.payload.liveStudentUnRead
+      };
+    }
+
+    case "SET-NEWQ": {
+      console.log("in dispatch SET-NEWQ");
+      return {
+        ...state,
+        newQNum: action.payload.newQNum
       };
     }
 
@@ -191,9 +211,11 @@ const store = createStore(
       // THIS SHOULD BE PART OF VEC?
       qNum: 0,
       complete: undefined, // could be true, false, undefined (=== skipped)
+      skipped: undefined,
       isCorrect: undefined, // true , false, undefined
       elapsedTime: 0 // seconds
     },
+    newQNum: "",
     currentQuestionUpdate: {},
     subscribedAllResponses: {},
     liveAllResponses: []

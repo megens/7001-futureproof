@@ -15,24 +15,41 @@ class CourseRun extends Component {
     console.log("UPDATE CourseRun");
   };
 
+  newQuestion = () => {
+    console.log("new Question");
+    let liveStudentUnReadCopy = this.props.liveStudentUnRead.slice();
+    let newQ;
+    let newQNum;
+    if (this.props.liveStudentUnRead.length === 0) {
+      console.log("UnRead is empty ... take new Q from history");
+      newQ = this.props.liveStudentHistory[
+        this.props.liveStudentHistory.length - 1
+      ];
+      newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
+    } else {
+      console.log("taking new Q from UnRead");
+      newQ = this.props.liveStudentUnRead[0];
+      newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
+      console.log(newQNum);
+      // in case we change the index from 0 to something more general ...
+      let idx = liveStudentUnReadCopy.findIndex(question => {
+        return question.qNum === newQ.qNum;
+      });
+      liveStudentUnReadCopy.splice(idx, 1);
+      this.props.dispatch({
+        type: "UPDATE-UNREAD-Q",
+        payload: { liveStudentUnRead: liveStudentUnReadCopy }
+      });
+    }
+    this.props.rD.history.push("/question/" + newQNum);
+  };
+
   render = () => {
     console.log("render CourseRun");
 
     console.log("liveCourseQuestions");
 
     let courseCode = this.props.liveCourseQuestions[0].courseCode;
-    let nextQ;
-    if (
-      this.props.currentQuestion.complete === false &&
-      this.props.currentQuestion.skipped === false
-    ) {
-      nextQ =
-        this.props.currentQuestion.courseCode +
-        "/" +
-        this.props.currentQuestion.qNum;
-    } else {
-      nextQ = this.props.newQNum;
-    }
     return (
       <div>
         {/*
@@ -52,7 +69,7 @@ class CourseRun extends Component {
         <Link to={"/courseRun/" + courseCode}>
           <button className="icon-btn long" id="switch-color">
             <i className="fas fa-compass"></i>
-            <span> C# {courseCode}</span>
+            <span> {courseCode}</span>
           </button>
           <br />
         </Link>
@@ -73,12 +90,10 @@ class CourseRun extends Component {
         </Link>
         <br />
 
-        <Link to={"/question/" + nextQ}>
-          <button className="icon-btn long">
-            <i className="fas fa-question"></i>
-            <span> Quiz Me</span>
-          </button>
-        </Link>
+        <button className="icon-btn long" onClick={this.newQuestion}>
+          <i className="fas fa-question"></i>
+          <span> Quiz Me</span>
+        </button>
 
         <br />
 
@@ -104,9 +119,7 @@ const mapStateToProps = state => {
     username: state.username,
     liveCourseQuestions: state.liveCourseQuestions,
     liveStudentUnRead: state.liveStudentUnRead,
-    liveStudentHistory: state.liveStudentHistory,
-    currentQuestion: state.currentQuestion,
-    newQNum: state.newQNum
+    liveStudentHistory: state.liveStudentHistory
   };
 };
 

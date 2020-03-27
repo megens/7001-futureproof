@@ -85,14 +85,6 @@ class NavQuiz extends Component {
 
     return (
       <div>
-        <Link to={"/question/" + "101/101-0001"}>
-          <button className="icon-btn short">
-            <i className="fas fa-plus"></i> New Q
-          </button>
-        </Link>
-
-        <br />
-
         <Link
           to={
             "/question/" +

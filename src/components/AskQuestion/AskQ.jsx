@@ -6,6 +6,7 @@ import AnswerTemplate from "../AnswerTemplate/AnswerTemplate.jsx";
 import QTimer from "../QTimer/QTimer.jsx";
 import NavQuiz from "../NavQuiz/NavQuiz.jsx";
 import TestQ from "../AskQuestion/TestQ.jsx";
+import { Link } from "react-router-dom";
 
 class AskQ extends Component {
   constructor(props) {
@@ -25,27 +26,10 @@ class AskQ extends Component {
     this.setState({ favourite: !this.state.favourite });
   };
 
-  newQuestion = () => {
-    console.log("new Question");
-    let liveStudentUnReadCopy = this.props.liveStudentUnRead.slice();
-    let newQ = this.props.liveStudentUnRead[0];
-    const newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
-    console.log(newQNum);
-    // in case we change the index from 0 to something more general ...
-    let idx = liveStudentUnReadCopy.findIndex(question => {
-      return question.qNum === newQ.qNum;
-    });
-    liveStudentUnReadCopy.splice(idx, 1);
-    this.props.dispatch({
-      type: "UPDATE-UNREAD-Q",
-      payload: { liveStudentUnRead: liveStudentUnReadCopy }
-    });
-    this.props.rD.history.push("/question/" + newQNum);
-  };
-
   render = () => {
     console.log("render AskQ");
     console.log(this.props.currentQuestion);
+
     return (
       <div className="course-container">
         <CourseRun />
@@ -74,9 +58,11 @@ class AskQ extends Component {
             this.props.liveStudentUnRead.length !== 0 &&
             (this.props.currentQuestion.complete ||
               this.props.currentQuestion.skipped) ? (
-              <button className="icon-btn long" onClick={this.newQuestion}>
-                <i className="fas fa-arrow-alt-circle-right"></i> New
-              </button>
+              <Link to={"/question/" + this.props.newQNum}>
+                <button className="icon-btn long">
+                  <i className="fas fa-arrow-alt-circle-right"></i> New
+                </button>
+              </Link>
             ) : (
               ""
             )}
@@ -120,7 +106,8 @@ const mapStateToProps = state => {
   return {
     currentQuestion: state.currentQuestion,
     liveStudentHistory: state.liveStudentHistory,
-    liveStudentUnRead: state.liveStudentUnRead
+    liveStudentUnRead: state.liveStudentUnRead,
+    newQNum: state.newQNum
   };
 };
 export default connect(mapStateToProps)(AskQ);
