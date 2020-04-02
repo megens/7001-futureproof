@@ -2,23 +2,43 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 const deepCopy = require("rfdc")(); // a really fast deep copy function
 
-class Template001 extends Component {
+class Template003 extends Component {
   constructor(props) {
     super(props);
     this.state = {
       selectedOption: this.props.currentQuestion.response_submitted
     };
   }
-
   /// MAKE THIS WORK FOR A VARIABLE NUMBER OF POSSIBLE ANSWERS, UP TO SAY 10, JUST IN CASE ... S/B EASY
 
   componentDidMount = () => {
-    console.log("MOUNT Template001");
+    console.log("MOUNT Template003");
     console.log(this.props.currentQuestion);
   };
 
   componentDidUpdate = () => {
-    console.log("UPDATE Template001");
+    console.log("UPDATE Template003");
+  };
+
+  handleChange = (changeEvent, idx) => {
+    console.log("option " + changeEvent.target.checked);
+    let currentQuestion = this.props.currentQuestion;
+    if (!currentQuestion.complete && !currentQuestion.skipped) {
+      let replacement = changeEvent.target.checked ? "Y" : "N";
+      let prevSelectedOption =
+        this.state.selectedOption.slice(0, idx) +
+        replacement +
+        this.state.selectedOption.slice(idx + 1);
+      console.log(prevSelectedOption);
+      console.log("idx " + idx);
+
+      console.log(prevSelectedOption);
+      this.setState({ selectedOption: prevSelectedOption });
+    } else {
+      console.log(
+        "not changing " + currentQuestion.complete + currentQuestion.skipped
+      );
+    }
   };
 
   handleOptionChange = changeEvent => {
@@ -187,6 +207,8 @@ class Template001 extends Component {
       response_a,
       response_b,
       response_c,
+      response_d,
+      response_e,
       response_correct,
       complete,
       skipped,
@@ -195,57 +217,44 @@ class Template001 extends Component {
       chapter
     } = this.props.currentQuestion;
 
+    let currentQuestionOptions = Object.keys(this.props.currentQuestion);
+
+    currentQuestionOptions = currentQuestionOptions.filter(x => {
+      return (
+        x.includes("response_") &&
+        !(x === "response_correct") &&
+        !(x === "response_submitted")
+      );
+    });
+
     return (
       <div className="question-template">
         <form onSubmit={this.submitHandler}>
           <b>{question}</b>
           <br />
           <br />
-          <input
-            type="radio"
-            id="a"
-            name="question"
-            className="form-check-input"
-            checked={
-              complete
-                ? response_submitted === "a"
-                : this.state.selectedOption === "a"
-            }
-            onChange={this.handleOptionChange}
-            value="a"
-          />
-          <label> a) {response_a}</label>
+
+          {currentQuestionOptions.map(option => {
+            const letter = option[option.length - 1];
+            const idx = "abcdefghij".indexOf(letter);
+            return (
+              <div key={option}>
+                <input
+                  type="checkbox"
+                  name={option}
+                  onChange={evt => this.handleChange(evt, idx)}
+                  checked={
+                    complete
+                      ? response_submitted[idx] === "Y"
+                      : this.state.selectedOption[idx] === "Y"
+                  }
+                />
+                {" " + this.props.currentQuestion[option]}
+              </div>
+            );
+          })}
           <br />
-          <input
-            type="radio"
-            id="b"
-            name="question"
-            className="form-check-input"
-            checked={
-              complete
-                ? response_submitted === "b"
-                : this.state.selectedOption === "b"
-            }
-            onChange={this.handleOptionChange}
-            value="b"
-          />
-          <label> b) {response_b}</label>
-          <br />
-          <input
-            type="radio"
-            id="c"
-            name="question"
-            className="form-check-input"
-            checked={
-              complete
-                ? response_submitted === "c"
-                : this.state.selectedOption === "c"
-            }
-            onChange={this.handleOptionChange}
-            value="c"
-          />
-          <label> c) {response_c}</label>
-          <br />
+
           {!complete && !skipped ? (
             <button type="submit" className="icon-btn long">
               {" "}
@@ -299,4 +308,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(Template001);
+export default connect(mapStateToProps)(Template003);

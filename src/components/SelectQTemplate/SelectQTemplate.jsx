@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import TestQ from "../AskQuestion/TestQ.jsx";
 import Template001 from "./Template001.jsx";
 import Template002 from "./Template002.jsx";
+import Template003 from "./Template003.jsx";
 
 class SelectQTemplate extends Component {
   constructor() {
@@ -37,6 +38,13 @@ class SelectQTemplate extends Component {
         console.log("template002");
         return (
           <Template002 rD={this.props.rD} indexOfQ={this.props.indexOfQ} />
+        );
+      }
+
+      case "Template003": {
+        console.log("template003");
+        return (
+          <Template003 rD={this.props.rD} indexOfQ={this.props.indexOfQ} />
         );
       }
 

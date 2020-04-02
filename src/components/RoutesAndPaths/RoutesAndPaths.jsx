@@ -118,6 +118,7 @@ class Routes extends Component {
       console.log(liveStudentHistory);
       const liveAllResponses = this.props.subscribedAllResponses[courseCode];
       console.log(liveAllResponses);
+      let subscriptionSettingsCopy = deepCopy(this.props.subscriptionSettings);
       let liveUnReadQs = liveCourse.questionVec.slice();
       for (let i = 0; i <= liveStudentHistory.length - 1; i++) {
         console.log("unread ", liveUnReadQs);
@@ -126,23 +127,71 @@ class Routes extends Component {
         });
         liveUnReadQs.splice(indexOfQ, 1);
       }
+      // define filter possibilities for new CourseLoad
 
+      let criteriaTypes = this.props.criteriaTypes;
+      let criteriaSet = [];
+      criteriaTypes.forEach(cType => {
+        liveCourse.questionVec.forEach(question => {
+          criteriaSet.push(cType + "_" + question[cType]);
+        });
+      });
+      // remove the many duplicates
+      criteriaSet = [...new Set(criteriaSet)];
+      //sort
+      criteriaSet = Array.from(criteriaSet).sort((a, b) => {
+        return a.localeCompare(b, "en", { sensitivity: "base" });
+      });
+      console.log("criteriaSet " + criteriaSet);
+      let courseSettingsObj = {};
+      // populate from prev saved settings, if avail.
+      // this is reloaded in case the Admin has added any further criteria or categories
+      criteriaSet.forEach(criterion => {
+        console.log("criterion " + criterion);
+        if (
+          true === this.props.subscriptionSettings[courseCode][criterion] ||
+          false === this.props.subscriptionSettings[courseCode][criterion]
+        ) {
+          //criterion is true
+          console.log("criterion is either true or false (i.e. not undefined)");
+          courseSettingsObj[criterion] = this.props.subscriptionSettings[
+            courseCode
+          ][criterion];
+        } else {
+          console.log("neither true nor false");
+          courseSettingsObj[criterion] = true;
+        }
+      });
+      console.log("courseSettingsObj");
+      console.log(courseSettingsObj);
+      subscriptionSettingsCopy[courseCode] = courseSettingsObj;
+      ////////////////////////
       let newQ = liveUnReadQs[0]; // a default POTENTIAL next Q if requested
       if (!newQ) {
         newQ = liveStudentHistory[liveStudentHistory.length - 1];
       }
       const newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
+      console.log("courseSettingsObj and this.props.subscriptionSettings");
+      console.log(courseSettingsObj);
+      console.log(subscriptionSettingsCopy[courseCode]);
 
-      console.log("dispatch LOAD-LIVE-COURSE");
-      this.props.dispatch({
-        type: "LOAD-LIVE-COURSE",
-        payload: {
-          liveCourseQuestions: liveCourse.questionVec,
-          liveStudentHistory: liveStudentHistory,
-          liveAllResponses: liveAllResponses.responses,
-          newQNum: newQNum
-        }
-      });
+      // FILL IN ALL CRITERIA TO NOT MATCH
+      if (!isEqual(courseSettingsObj, this.props.liveQuizFilterObj)) {
+        console.log("dispatch LOAD-LIVE-COURSE");
+        this.props.dispatch({
+          type: "LOAD-LIVE-COURSE",
+          payload: {
+            liveCourseCode: courseCode,
+            liveCourseQuestions: liveCourse.questionVec,
+            liveCourseChapters: liveCourse.chapters,
+            liveQuizFilterObj: courseSettingsObj,
+            liveStudentHistory: liveStudentHistory,
+            liveAllResponses: liveAllResponses.allResponses,
+            subscriptionSettings: subscriptionSettingsCopy,
+            newQNum: newQNum
+          }
+        });
+      }
 
       if (!this.arraysMatch(liveUnReadQs, this.props.liveStudentUnRead)) {
         console.log("dispatch UPDATE-UNREAD-Q");
@@ -326,10 +375,14 @@ const mapStateToProps = state => {
     studentHistory: state.studentHistory,
     liveStudentHistory: state.liveStudentHistory,
     liveCourseQuestions: state.liveCourseQuestions,
+    liveCourseSettings: state.liveCourseSettings,
+    subscriptionSettings: state.subscriptionSettings,
+    liveQuizFilterObj: state.liveQuizFilterObj,
     liveStudentUnRead: state.liveStudentUnRead,
     currentQuestion: state.currentQuestion,
     subscribedAllResponses: state.subscribedAllResponses,
-    newQNum: state.newQNum
+    newQNum: state.newQNum,
+    criteriaTypes: state.criteriaTypes
   }; // THIS WILL CHANGE
 };
 

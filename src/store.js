@@ -79,6 +79,25 @@ function reducer(state, action) {
       };
     }
 
+    case "UPDATE-LIVE-QUIZ-FILTER": {
+      console.log("in UPDATE-LIVE-QUIZ-FILTER");
+      return {
+        ...state,
+        liveQuizFilterObj: {
+          ...state.liveQuizFilterObj,
+          [action.payload.criterion]: action.payload.checked
+        }
+      };
+    }
+
+    case "UPDATE-SUBSCRIPTIONSETTINGS": {
+      console.log("in UPDATE-SUBSCRIPTIONSETTINGS");
+      return {
+        ...state,
+        subscriptionSettings: action.payload.subscriptionSettings
+      };
+    }
+
     case "SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY": {
       // adding a new question to history via renderQuestion on RoutesAndPaths.jsx
       console.log("in dispatch SET-CURRENT-QUESTION-AND-LIVESTUDENTHISTORY");
@@ -167,8 +186,13 @@ function reducer(state, action) {
       console.log("in dispatch LOAD-LIVE-COURSE");
       return {
         ...state,
+        liveCourseCode: action.payload.liveCourseCode,
         liveCourseQuestions: action.payload.liveCourseQuestions,
+        liveCourseChapters: action.payload.liveCourseChapters,
+        liveQuizFilterObj: action.payload.liveQuizFilterObj,
+        subscriptionSettings: action.payload.subscriptionSettings,
         liveStudentHistory: action.payload.liveStudentHistory,
+        liveAllResponses: action.payload.liveAllResponses,
         newQNum: action.payload.newQNum
         //currentQuestion: action.payload.liveCourseQuestions.slice(-1)[0]
         //liveStudentUnRead: action.payload.liveStudentUnRead
@@ -201,10 +225,14 @@ const store = createStore(
     subscriptionSettings: {}, // object of objects (of settings for each course)
     subscribedCourses: {}, // array of course objects
     purchaseItem: {}, // course object
-    currentCourseRun: {}, // current course object
+    currentCourseRun: {}, // current course object,
+    liveCourseCode: "",
+    liveCourseSettings: {},
     liveCourseQuestions: [{ qNum: 0 }, { qNum: 1 }], // array of questions (one array from subscribedCourses)
+    liveCourseChapters: [],
     liveStudentHistory: [], // array of studentHistory (one array from studentHistory)
     liveStudentUnRead: [], // at courseRun, populate the difference from liveCourseQuestions and liveStudentHistory
+    liveQuizFilterObj: {},
     elapsedTime: 0, // seconds spent on question
     timerOn: true, // global state so different components can influence
     currentQuestion: {
@@ -218,7 +246,8 @@ const store = createStore(
     newQNum: "",
     currentQuestionUpdate: {},
     subscribedAllResponses: {},
-    liveAllResponses: []
+    liveAllResponses: [],
+    criteriaTypes: ["chapter", "qType", "qVerbosity"]
   },
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );

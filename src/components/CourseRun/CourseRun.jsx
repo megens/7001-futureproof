@@ -16,20 +16,16 @@ class CourseRun extends Component {
   };
 
   render = () => {
+    // TO DO: if currentQuestion doesn't pass courseSettings filter, reset currentQuestion and nextQ
     console.log("render CourseRun");
-
-    console.log("liveCourseQuestions");
-
-    let courseCode = this.props.liveCourseQuestions[0].courseCode;
+    let courseCode = this.props.liveCourseCode;
     let nextQ;
     if (
       this.props.currentQuestion.complete === false &&
       this.props.currentQuestion.skipped === false
     ) {
-      nextQ =
-        this.props.currentQuestion.courseCode +
-        "/" +
-        this.props.currentQuestion.qNum;
+      // if current question was not completed, the nextQ remains the current one
+      nextQ = this.props.liveCourseCode + "/" + this.props.currentQuestion.qNum;
     } else {
       nextQ = this.props.newQNum;
     }
@@ -102,7 +98,9 @@ class CourseRun extends Component {
 const mapStateToProps = state => {
   return {
     username: state.username,
+    liveCourseCode: state.liveCourseCode,
     liveCourseQuestions: state.liveCourseQuestions,
+    liveCourseSettings: state.liveCourseSettings,
     liveStudentUnRead: state.liveStudentUnRead,
     liveStudentHistory: state.liveStudentHistory,
     currentQuestion: state.currentQuestion,
