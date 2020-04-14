@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import TestQ from "../AskQuestion/TestQ.jsx";
 import Template001 from "./Template001.jsx";
 import Template002 from "./Template002.jsx";
 import Template003 from "./Template003.jsx";
@@ -54,9 +53,9 @@ class SelectQTemplate extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
-    currentQuestion: state.currentQuestion
+    currentQuestion: state.currentQuestion,
   };
 };
 export default connect(mapStateToProps)(SelectQTemplate);

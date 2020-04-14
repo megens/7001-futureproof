@@ -14,7 +14,7 @@ function reducer(state, action) {
         subscriptions: action.payload.subscriptions,
         subscribedCourses: action.payload.subscribedCourses,
         subscriptionSettings: action.payload.subscriptionSettings,
-        subscribedAllResponses: action.payload.subscribedAllResponses
+        subscribedAllResponses: action.payload.subscribedAllResponses,
       };
     }
 
@@ -28,7 +28,7 @@ function reducer(state, action) {
         studentHistory: {},
         subscriptions: [],
         subscriptionSettings: [],
-        subscribedCourses: []
+        subscribedCourses: [],
       };
     }
 
@@ -36,7 +36,7 @@ function reducer(state, action) {
       console.log("in dispatch LOAD-COURSES");
       return {
         ...state,
-        courseList: action.payload.courseList
+        courseList: action.payload.courseList,
       };
     }
 
@@ -44,7 +44,7 @@ function reducer(state, action) {
       console.log("in dispatch SET-PURCHASE-ITEM");
       return {
         ...state,
-        purchaseItem: action.payload.purchaseItem
+        purchaseItem: action.payload.purchaseItem,
       };
     }
 
@@ -75,26 +75,69 @@ function reducer(state, action) {
         ...state,
         subscriptions: newSubscriptions,
         studentHistory: newStudentHistory,
-        subscribedCourses: newSubscribedCourses
+        subscribedCourses: newSubscribedCourses,
       };
     }
 
-    case "UPDATE-LIVE-QUIZ-FILTER": {
-      console.log("in UPDATE-LIVE-QUIZ-FILTER");
+    case "UPDATE-LIVECOURSE-CRITERION": {
+      console.log("in UPDATE-LIVECOURSE-CRITERION");
       return {
         ...state,
-        liveQuizFilterObj: {
-          ...state.liveQuizFilterObj,
-          [action.payload.criterion]: action.payload.checked
-        }
+        liveCourseSettings: {
+          ...state.liveCourseSettings,
+          [action.payload.criterion]: action.payload.checked,
+        },
       };
     }
 
+    case "UPDATE-COURSE-SETTINGS": {
+      console.log("in UPDATE-COURSE-SETTINGS");
+      return {
+        ...state,
+        liveCourseSettings: action.payload.liveCourseSettings,
+        subscriptionSettings: action.payload.subscriptionSettings,
+      };
+    }
+
+    case "UPDATE-LIVE-COURSE-SETTINGS": {
+      console.log("in UPDATE-LIVE-COURSE-SETTINGS");
+      return {
+        ...state,
+        liveCourseSettings: action.payload.liveCourseSettings,
+      };
+    }
+
+    // TO DO: is this one necessary?
     case "UPDATE-SUBSCRIPTIONSETTINGS": {
       console.log("in UPDATE-SUBSCRIPTIONSETTINGS");
       return {
         ...state,
-        subscriptionSettings: action.payload.subscriptionSettings
+        subscriptionSettings: action.payload.subscriptionSettings,
+      };
+    }
+
+    case "UPDATE-UNREADQS": {
+      console.log("in dispatch UPDATE-UNREADQS");
+      return {
+        ...state,
+        liveStudentUnRead: action.payload.liveStudentUnRead,
+        filteredUnReadQs: action.payload.filteredUnReadQs,
+      };
+    }
+
+    case "UPDATE-CRITERIA-SET": {
+      console.log("in dispatch UPDATE-UNREADQS");
+      return {
+        ...state,
+        criteriaSet: action.payload.criteriaSet,
+      };
+    }
+
+    case "UPDATE-NEWQNUM": {
+      console.log("in UPDATE-NEWQNUM ");
+      return {
+        ...state,
+        newQNum: action.payload.newQNum,
       };
     }
 
@@ -111,15 +154,8 @@ function reducer(state, action) {
         currentQuestion: action.payload.currentQuestion,
         liveStudentHistory: action.payload.liveStudentHistory,
         liveStudentUnRead: action.payload.liveStudentUnRead,
-        newQNum: action.payload.newQNum
-      };
-    }
-
-    case "UPDATE-UNREAD-Q": {
-      console.log("in dispatch UPDATE-UNREAD-Q");
-      return {
-        ...state,
-        liveStudentUnRead: action.payload.liveStudentUnRead
+        filteredUnReadQs: action.payload.filteredUnReadQs,
+        newQNum: action.payload.newQNum,
       };
     }
 
@@ -138,7 +174,7 @@ function reducer(state, action) {
         liveStudentHistory: action.payload.liveStudentHistory,
         studentHistory: action.payload.studentHistory,
         subscribedAllResponses: action.payload.subscribedAllResponses,
-        liveAllResponses: action.payload.liveAllResponses
+        liveAllResponses: action.payload.liveAllResponses,
       };
     }
 
@@ -148,12 +184,8 @@ function reducer(state, action) {
       return {
         ...state,
         currentQuestion: action.payload.currentQuestion,
-        elapsedTime: action.payload.currentQuestion.elapsedTime
+        elapsedTime: action.payload.currentQuestion.elapsedTime,
       };
-    }
-
-    case "UPDATE-STUDENT-HISTORY": {
-      //
     }
 
     case "REMOVE-Q": {
@@ -162,7 +194,8 @@ function reducer(state, action) {
         ...state,
         liveStudentHistory: action.payload.liveStudentHistory,
         studentHistory: action.payload.studentHistory,
-        currentQuestion: action.payload.currentQuestion
+        currentQuestion: action.payload.currentQuestion,
+        newQNum: action.payload.newQNum,
       };
     }
 
@@ -170,7 +203,7 @@ function reducer(state, action) {
       console.log("in dispatch SET-TIMER-ON");
       return {
         ...state,
-        timerOn: action.payload.timerOn
+        timerOn: action.payload.timerOn,
       };
     }
 
@@ -178,7 +211,7 @@ function reducer(state, action) {
       console.log("in dispatch SET-ANSWER-TIME");
       return {
         ...state,
-        elapsedTime: action.payload
+        elapsedTime: action.payload,
       };
     }
 
@@ -186,16 +219,27 @@ function reducer(state, action) {
       console.log("in dispatch LOAD-LIVE-COURSE");
       return {
         ...state,
-        liveCourseCode: action.payload.liveCourseCode,
-        liveCourseQuestions: action.payload.liveCourseQuestions,
-        liveCourseChapters: action.payload.liveCourseChapters,
-        liveQuizFilterObj: action.payload.liveQuizFilterObj,
-        subscriptionSettings: action.payload.subscriptionSettings,
+        liveCourse: action.payload.liveCourse,
         liveStudentHistory: action.payload.liveStudentHistory,
         liveAllResponses: action.payload.liveAllResponses,
-        newQNum: action.payload.newQNum
+        subscriptionSettings: action.payload.subscriptionSettings,
+        liveCourseSettings: action.payload.liveCourseSettings,
+        criteriaSet: action.payload.criteriaSet,
+        currentQuestion: action.payload.currentQuestion,
         //currentQuestion: action.payload.liveCourseQuestions.slice(-1)[0]
-        //liveStudentUnRead: action.payload.liveStudentUnRead
+        newQNum: action.payload.newQNum,
+        liveStudentUnRead: action.payload.liveStudentUnRead,
+        filteredUnReadQs: action.payload.filteredUnReadQs,
+      };
+    }
+
+    case "UPDATE-STUDENT-HISTORY": {
+      console.log("in UPDATE-STUDENT-HISTORY");
+      return {
+        ...state,
+        liveStudentHistory: action.payload.liveStudentHistory,
+        studentHistory: action.payload.studentHistory,
+        currentQuestion: action.payload.currentQuestion,
       };
     }
 
@@ -203,7 +247,19 @@ function reducer(state, action) {
       console.log("in dispatch SET-NEWQ");
       return {
         ...state,
-        newQNum: action.payload.newQNum
+        newQNum: action.payload.newQNum,
+      };
+    }
+
+    case "BULK-ADD-HISTORY": {
+      console.log("in dispatch BULK-ADD-HISTORY");
+      // called from Admin ... artificially creating history
+      return {
+        ...state,
+        liveStudentHistory: action.payload.liveStudentHistory,
+        studentHistory: action.payload.studentHistory,
+        liveAllResponses: action.payload.liveAllResponses,
+        subscribedAllResponses: action.payload.subscribedAllResponses,
       };
     }
 
@@ -225,14 +281,12 @@ const store = createStore(
     subscriptionSettings: {}, // object of objects (of settings for each course)
     subscribedCourses: {}, // array of course objects
     purchaseItem: {}, // course object
-    currentCourseRun: {}, // current course object,
-    liveCourseCode: "",
+    currentCourseMenu: {}, // current course object,
     liveCourseSettings: {},
-    liveCourseQuestions: [{ qNum: 0 }, { qNum: 1 }], // array of questions (one array from subscribedCourses)
     liveCourseChapters: [],
     liveStudentHistory: [], // array of studentHistory (one array from studentHistory)
-    liveStudentUnRead: [], // at courseRun, populate the difference from liveCourseQuestions and liveStudentHistory
-    liveQuizFilterObj: {},
+    liveStudentUnRead: [], // at CourseMenu, populate the difference
+    filteredUnReadQs: [],
     elapsedTime: 0, // seconds spent on question
     timerOn: true, // global state so different components can influence
     currentQuestion: {
@@ -241,13 +295,14 @@ const store = createStore(
       complete: undefined, // could be true, false, undefined (=== skipped)
       skipped: undefined,
       isCorrect: undefined, // true , false, undefined
-      elapsedTime: 0 // seconds
+      elapsedTime: 0, // seconds
     },
     newQNum: "",
     currentQuestionUpdate: {},
     subscribedAllResponses: {},
     liveAllResponses: [],
-    criteriaTypes: ["chapter", "qType", "qVerbosity"]
+    criteriaTypes: ["chapter", "qType", "setter"],
+    criteriaSet: [],
   },
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );

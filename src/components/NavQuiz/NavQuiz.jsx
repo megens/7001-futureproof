@@ -1,6 +1,12 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import {
+  refreshCriteriaSet,
+  refreshCourseSettings,
+  refreshUnRead,
+} from "../Utilities/utilities.js";
+
 const deepCopy = require("rfdc")(); // a really fast deep copy function
 
 class NavQuiz extends Component {
@@ -9,13 +15,13 @@ class NavQuiz extends Component {
     this.state = { qFlagged: false };
   }
 
-  flagQuestion = evt => {
+  flagQuestion = (evt) => {
     evt.preventDefault();
     console.log("question flagged");
     this.setState({ qFlagged: !this.state.qFlagged });
   };
 
-  removeQFromHistory = evt => {
+  removeQFromHistory = (evt) => {
     evt.preventDefault();
     console.log("remove Q from History");
     const courseCode = this.props.currentQuestion.courseCode;
@@ -23,7 +29,7 @@ class NavQuiz extends Component {
       "This response will be permanently deleted from your history. Are you sure?"
     );
     if (deleteConfirmed) {
-      let newLiveStudentHistory = this.props.liveStudentHistory.slice();
+      let newLiveStudentHistory = deepCopy(this.props.liveStudentHistory);
       let lengthWas = newLiveStudentHistory.length;
       let indexOfQWas = this.props.indexOfQ;
 
@@ -49,6 +55,33 @@ class NavQuiz extends Component {
 
       let studentHistoryCopy = deepCopy(this.props.studentHistory);
       studentHistoryCopy[courseCode] = newLiveStudentHistory;
+
+      const unReadARRAY = refreshUnRead(
+        this.props.liveCourse,
+        this.props.criteriaTypes,
+        this.props.liveCourseSettings,
+        newLiveStudentHistory
+      );
+      let liveUnReadQs = unReadARRAY[0];
+      let filteredUnReadQs = unReadARRAY[1];
+
+      // TO DO: move the following into refreshUnRead if it's consistent
+      let currentQuestion;
+      if (filteredUnReadQs.length === 0) {
+        //no new question left, so render last answered
+        currentQuestion =
+          newLiveStudentHistory[newLiveStudentHistory.length - 1];
+      } else {
+        currentQuestion = filteredUnReadQs[0];
+      }
+
+      let newQ = filteredUnReadQs[1]; // a default POTENTIAL next Q if requested
+      if (!newQ) {
+        newQ = newLiveStudentHistory[newLiveStudentHistory.length - 1];
+      }
+      const newQNum = "" + newQ.courseCode + "/" + newQ.qNum;
+      ////////
+
       console.log("dispatch to REMOVE-Q");
       console.log(newLiveStudentHistory);
       console.log("length " + newLiveStudentHistory.length);
@@ -57,8 +90,17 @@ class NavQuiz extends Component {
         payload: {
           studentHistory: studentHistoryCopy,
           liveStudentHistory: newLiveStudentHistory,
-          currentQuestion: {}
-        }
+          currentQuestion: currentQuestion,
+          newQNum: newQNum,
+        },
+      });
+
+      this.props.dispatch({
+        type: "UPDATE-UNREADQS",
+        payload: {
+          filteredUnReadQs: filteredUnReadQs,
+          liveStudentUnRead: liveUnReadQs,
+        },
       });
 
       // TO DO: update on server here ... currently will update on server at Logout anyway, but just in case
@@ -69,7 +111,7 @@ class NavQuiz extends Component {
       console.log(this.props.liveStudentHistory[Math.max(0, indexOfQWas)].qNum);
 
       if (lengthWas <= 1) {
-        this.props.rD.history.push("/courseRun/" + courseCode);
+        this.props.rD.history.push("/CourseMenu/" + courseCode);
       } else {
         this.props.rD.history.push("/question/" + courseCode + "/" + goToQ);
       }
@@ -201,11 +243,16 @@ class NavQuiz extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
+    liveCourse: state.liveCourse,
+    criteriaTypes: state.criteriaTypes,
+    liveCourseSettings: state.liveCourseSettings,
     studentHistory: state.studentHistory,
     liveStudentHistory: state.liveStudentHistory,
-    currentQuestion: state.currentQuestion
+    currentQuestion: state.currentQuestion,
+    liveStudentUnRead: state.liveStudentUnRead,
+    filteredUnReadQs: state.filteredUnReadQs,
   };
 };
 

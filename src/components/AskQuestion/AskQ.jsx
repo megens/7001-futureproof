@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import CourseRun from "../CourseRun/CourseRun.jsx";
+import CourseMenu from "../CourseMenu/CourseMenu.jsx";
 import SelectQTemplate from "../SelectQTemplate/SelectQTemplate.jsx";
 import AnswerTemplate from "../AnswerTemplate/AnswerTemplate.jsx";
 import QTimer from "../QTimer/QTimer.jsx";
 import NavQuiz from "../NavQuiz/NavQuiz.jsx";
-import TestQ from "../AskQuestion/TestQ.jsx";
 import { Link } from "react-router-dom";
 
 class AskQ extends Component {
@@ -32,7 +31,7 @@ class AskQ extends Component {
 
     return (
       <div className="course-container">
-        <CourseRun />
+        <CourseMenu />
         <div className="wide">
           <br />
           <div className="question-box">
@@ -55,7 +54,7 @@ class AskQ extends Component {
             <br />
             <SelectQTemplate rD={this.props.rD} />
             {this.props.indexOfQ === this.props.liveStudentHistory.length - 1 &&
-            this.props.liveStudentUnRead.length !== 0 &&
+            this.props.filteredUnReadQs.length !== 0 &&
             (this.props.currentQuestion.complete ||
               this.props.currentQuestion.skipped) ? (
               <Link to={"/question/" + this.props.newQNum}>
@@ -67,10 +66,19 @@ class AskQ extends Component {
               ""
             )}
             {this.props.indexOfQ === this.props.liveStudentHistory.length - 1 &&
-            this.props.liveStudentUnRead.length === 0 &&
+            this.props.filteredUnReadQs.length === 0 &&
             (this.props.currentQuestion.complete ||
               this.props.currentQuestion.skipped)
               ? "You have answered all questions for this course."
+              : ""}
+            <br />
+
+            {this.props.indexOfQ === this.props.liveStudentHistory.length - 1 &&
+            this.props.filteredUnReadQs.length === 0 &&
+            this.props.liveStudentUnRead.length > 0 &&
+            (this.props.currentQuestion.complete ||
+              this.props.currentQuestion.skipped)
+              ? "Additional Questions are available if you change settings."
               : ""}
 
             <QTimer />
@@ -102,12 +110,13 @@ class AskQ extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     currentQuestion: state.currentQuestion,
     liveStudentHistory: state.liveStudentHistory,
     liveStudentUnRead: state.liveStudentUnRead,
-    newQNum: state.newQNum
+    filteredUnReadQs: state.filteredUnReadQs,
+    newQNum: state.newQNum,
   };
 };
 export default connect(mapStateToProps)(AskQ);

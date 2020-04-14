@@ -7,7 +7,7 @@ class Course extends Component {
     super(props);
   }
 
-  handleChange = evt => {
+  handleChange = (evt) => {
     responseSubmitted = evt.target.name;
   };
 
@@ -38,10 +38,10 @@ class Course extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     subscriptions: state.subscriptions,
-    currentCourseRun: state.currentCourseRun
+    currentCourseMenu: state.currentCourseMenu,
   };
 };
 

@@ -2,40 +2,37 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-class CourseRun extends Component {
+class CourseMenu extends Component {
   constructor(props) {
     super(props);
   }
 
   componentDidMount = () => {
-    console.log("MOUNT courseRun");
+    console.log("MOUNT CourseMenu");
   };
 
   componentDidUpdate = () => {
-    console.log("UPDATE CourseRun");
+    console.log("UPDATE CourseMenu");
   };
 
   render = () => {
     // TO DO: if currentQuestion doesn't pass courseSettings filter, reset currentQuestion and nextQ
-    console.log("render CourseRun");
-    let courseCode = this.props.liveCourseCode;
+    console.log("render CourseMenu");
+    let courseCode = this.props.liveCourse.courseCode;
     let nextQ;
-    if (
-      this.props.currentQuestion.complete === false &&
-      this.props.currentQuestion.skipped === false
-    ) {
+    if (this.props.currentQuestion) {
       // if current question was not completed, the nextQ remains the current one
-      nextQ = this.props.liveCourseCode + "/" + this.props.currentQuestion.qNum;
+      console.log("nextQ remains the currentQuestion");
+      nextQ =
+        this.props.liveCourse.courseCode +
+        "/" +
+        this.props.currentQuestion.qNum;
     } else {
+      console.log("new nextQ");
       nextQ = this.props.newQNum;
     }
     return (
       <div>
-        {/*
-        {chapterList.map(chapter => {
-          return <div>chapter : {<input type="checkbox" />}</div>;
-        })}
-        */}
         <br />
         <Link to={"/myProfile/" + this.props.username}>
           <button className="icon-btn long">
@@ -45,7 +42,7 @@ class CourseRun extends Component {
         </Link>
         <br />
 
-        <Link to={"/courseRun/" + courseCode}>
+        <Link to={"/CourseMenu/" + courseCode}>
           <button className="icon-btn long" id="switch-color">
             <i className="fas fa-compass"></i>
             <span> C# {courseCode}</span>
@@ -60,7 +57,8 @@ class CourseRun extends Component {
           </button>
         </Link>
         <br />
-
+        {/*
+         */}
         <Link to={"/study/"}>
           <button className="icon-btn long">
             <i className="fas fa-chalkboard-teacher"></i>
@@ -85,9 +83,9 @@ class CourseRun extends Component {
         </Link>
 
         <br />
-        <Link to={"/archive/" + this.props.courseCode}>
+        <Link to={"/admin"}>
           <button className="icon-btn long">
-            <i className="fas fa-archive"></i> <span> Archive</span>
+            <i className="fas fa-archive"></i> <span> Admin</span>
           </button>
         </Link>
       </div>
@@ -95,17 +93,16 @@ class CourseRun extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     username: state.username,
-    liveCourseCode: state.liveCourseCode,
-    liveCourseQuestions: state.liveCourseQuestions,
+    liveCourse: state.liveCourse,
     liveCourseSettings: state.liveCourseSettings,
     liveStudentUnRead: state.liveStudentUnRead,
     liveStudentHistory: state.liveStudentHistory,
     currentQuestion: state.currentQuestion,
-    newQNum: state.newQNum
+    newQNum: state.newQNum,
   };
 };
 
-export default connect(mapStateToProps)(CourseRun);
+export default connect(mapStateToProps)(CourseMenu);

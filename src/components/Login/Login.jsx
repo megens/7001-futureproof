@@ -8,18 +8,24 @@ class Login extends Component {
   }
 
   componentDidMount = () => {
-    this.nameInput.focus();
+    //this.nameInput.focus();
+    console.log("MOUNT Login here i am");
+    this.openForm();
+    console.log(this.props.rD);
   };
-  usernameChange = evt => {
+  usernameChange = (evt) => {
+    console.log(evt.target.value);
     this.setState({ usernameInput: evt.target.value });
   };
 
-  passwordChange = evt => {
+  passwordChange = (evt) => {
     this.setState({ passwordInput: evt.target.value });
   };
 
-  submitHandler = async evt => {
+  submitHandler = async (evt) => {
     evt.preventDefault();
+    console.log("in submitHandler ");
+
     let username = this.state.usernameInput;
     let password = this.state.passwordInput;
     console.log(username + " " + password);
@@ -43,17 +49,76 @@ class Login extends Component {
           subscriptions: parsed.subscriptions,
           subscribedCourses: parsed.subscribedCourses,
           subscriptionSettings: parsed.subscriptionSettings,
-          subscribedAllResponses: parsed.subscribedAllResponses
-        }
+          subscribedAllResponses: parsed.subscribedAllResponses,
+        },
       });
       //this.props.setUsername(username);
-      this.props.rD.history.push("/myProfile/" + username);
+      //this.props.rD.history.push("/myProfile/" + username);
     }
+  };
+
+  openForm = () => {
+    document.getElementById("loginPopup").style.display = "block";
+    this.usernameInput.focus();
+  };
+  closeForm = () => {
+    document.getElementById("loginPopup").style.display = "none";
   };
 
   render = () => {
     return (
       <>
+        <div className="form-popup" id="loginPopup">
+          <form onSubmit={this.submitHandler} className="form-container">
+            <h1>LOGIN</h1>
+            <label>
+              <b>Username</b>
+            </label>
+            <input
+              type="text"
+              ref={(input) => {
+                this.usernameInput = input;
+              }}
+              placeholder="Enter username"
+              name="username"
+              required
+              onChange={this.usernameChange}
+              value={this.state.usernameInput}
+            />
+            <label>
+              <b>Password</b>
+            </label>
+            <input
+              type="password"
+              placeholder="Enter Password"
+              name="psw"
+              required
+              value={this.state.passwordInput}
+              onChange={this.passwordChange}
+            />
+            <button type="submit" className="btn">
+              <b>LOGIN</b>
+            </button>
+          </form>
+
+          <div className="form-container">
+            <label>
+              <b>Not registered?</b>
+            </label>
+            <button type="button" className="btn">
+              <b>REGISTER</b>
+            </button>
+            <button
+              type="button"
+              className="btn cancel"
+              onClick={this.closeForm}
+            >
+              <b>CLOSE</b>
+            </button>
+          </div>
+        </div>
+
+        {/*
         <form className="login-form" onSubmit={this.submitHandler}>
           <div>
             <h3>Log In:</h3>
@@ -61,7 +126,7 @@ class Login extends Component {
           Username:
           <input
             type="text"
-            ref={input => {
+            ref={(input) => {
               this.nameInput = input;
             }}
             onChange={this.usernameChange}
@@ -75,6 +140,7 @@ class Login extends Component {
           ></input>{" "}
           <input type="submit" value="Log In" />
         </form>
+        */}
       </>
     );
     //

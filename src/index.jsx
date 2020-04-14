@@ -5,6 +5,8 @@ import store from "./store.js";
 import App from "./components/App/App.jsx";
 import "babel-polyfill";
 import "./main.css";
+import "./nv.d3.css";
+
 import reloadMagic from "./reload-magic-client.js"; // automatic reload
 
 reloadMagic(); // automatic reload

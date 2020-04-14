@@ -27,7 +27,7 @@ class MyProfile extends Component {
           {courseCodeKeys.map((courseCode, idx) => {
             return (
               <div key={idx}>
-                <Link to={"/courseRun/" + courseCode}>
+                <Link to={"/CourseMenu/" + courseCode}>
                   <button type="button">
                     <b>{courseCode}</b>
                   </button>
@@ -50,7 +50,7 @@ const mapStateToProps = (state, props) => {
   return {
     loggedIn: state.loggedIn,
     username: state.username,
-    subscriptions: state.subscriptions
+    subscriptions: state.subscriptions,
   };
 };
 

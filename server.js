@@ -18,7 +18,7 @@ let url = configJson.url;
 const bodyParser = require("body-parser");
 const postCharge = require("./src/stripey.js");
 require("dotenv").config();
-const port = process.env.PORT || 7000;
+
 app.use(bodyParser.json());
 
 app.use("/", express.static("build")); // Needed for the HTML and JS files
@@ -83,7 +83,7 @@ app.post("/login", upload.none(), async (req, res) => {
           cart: user.cart,
           studentHistory: user.studentHistory,
           subscriptions: user.subscriptions,
-          subscriptionSettings: user.subscriptionSettings
+          subscriptionSettings: user.subscriptionSettings,
         };
         console.log("success : ", user);
         console.log("returnObject is ");
@@ -110,7 +110,7 @@ app.post("/login", upload.none(), async (req, res) => {
           }
         };
 
-        const loadCourse = async x => {
+        const loadCourse = async (x) => {
           console.log("ok2");
           const course = await dbo
             .collection("courses")
@@ -123,7 +123,7 @@ app.post("/login", upload.none(), async (req, res) => {
           console.log(subscribedCoursesTemp);
         };
 
-        const loadResponseVec = async x => {
+        const loadResponseVec = async (x) => {
           console.log("ok4");
           const responseVec = await dbo
             .collection("responses")
@@ -131,7 +131,7 @@ app.post("/login", upload.none(), async (req, res) => {
           console.log("ok3");
           console.log(x);
           console.log(responseVec);
-          subscribedAllResponsesTemp[x] = responseVec;
+          subscribedAllResponsesTemp[x] = responseVec.allResponses;
           console.log("subscribedAllResponses");
           console.log(subscribedAllResponsesTemp);
         };
@@ -172,7 +172,7 @@ app.post("/signup", upload.none(), async (req, res) => {
     subscriptions: {},
     subscribedCourses: {},
     subscriptionSettings: {},
-    subscribedAllResponses: {}
+    subscribedAllResponses: {},
   });
   console.log("signup success");
   let sessionId = generateId();
@@ -207,9 +207,9 @@ app.post("/logout", upload.none(), async (req, res) => {
       $set: {
         cart: cart,
         studentHistory: studentHistory,
-        subscriptionSettings: subscriptionSettings
+        subscriptionSettings: subscriptionSettings,
         //subscriptions themselves are updated at time of purchase
-      }
+      },
     }
   );
 
@@ -250,7 +250,7 @@ app.post("/update-my-profile/", upload.none(), async (req, res) => {
           username: user.username,
           cart: user.cart,
           studentHistory: user.studentHistory,
-          subscriptions: user.subscriptions
+          subscriptions: user.subscriptions,
         })
       );
       console.log("success : ", user);
@@ -264,7 +264,7 @@ app.post("/update-my-profile/", upload.none(), async (req, res) => {
       username: user.username,
       cart: user.cart,
       studentHistory: user.studentHistory,
-      subscriptions: user.subscriptions
+      subscriptions: user.subscriptions,
     })
   );
 
@@ -297,8 +297,8 @@ app.post("/record-purchased-course/", upload.none(), async (req, res) => {
     {
       $set: {
         subscriptions: newSubscriptions,
-        studentHistory: newStudentHistory
-      }
+        studentHistory: newStudentHistory,
+      },
     }
   );
   console.log("db updated with new subscriptions for " + name);
@@ -318,8 +318,8 @@ app.post("/update-student-history/", upload.none(), async (req, res) => {
     { username: name },
     {
       $set: {
-        studentHistory: studentHistory
-      }
+        studentHistory: studentHistory,
+      },
     }
   );
   console.log("db updated with new studentHistory for " + name);
@@ -351,7 +351,7 @@ app.post("/update-student-history/", upload.none(), async (req, res) => {
       console.log(allResponses);
       console.log(currentQuestion.qNum);
 
-      let indexOfQ = allResponses.findIndex(response => {
+      let indexOfQ = allResponses.findIndex((response) => {
         console.log("comparison");
         console.log(response.qNum);
         currentQuestion.qNum;
@@ -374,8 +374,8 @@ app.post("/update-student-history/", upload.none(), async (req, res) => {
         { courseCode: courseCode },
         {
           $set: {
-            allResponses: allResponses
-          }
+            allResponses: allResponses,
+          },
         }
       );
       console.log(
@@ -395,6 +395,9 @@ app.all("/*", (req, res, next) => {
   res.sendFile(__dirname + "/build/index.html");
 });
 
-app.listen(port, "0.0.0.0", () => {
-  console.log("Server running on port " + port);
+//this was const port = process.env.PORT || 7000;
+const { PORT = 7000, LOCAL_ADDRESS = "0.0.0.0" } = process.env;
+
+app.listen(PORT, LOCAL_ADDRESS, () => {
+  console.log("Server running on port " + PORT);
 });

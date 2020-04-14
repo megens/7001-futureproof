@@ -6,7 +6,7 @@ class Template002 extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedOption: this.props.currentQuestion.response_submitted
+      selectedOption: this.props.currentQuestion.response_submitted,
     };
   }
 
@@ -19,34 +19,63 @@ class Template002 extends Component {
     console.log("UPDATE Template002");
   };
 
-  handleOptionChange = changeEvent => {
+  componentWillUnmount = () => {
+    console.log("UNMOUNT Template002");
+    const currentQuestion = this.props.currentQuestion;
+    const qNumber = currentQuestion.qNum;
+    if (!(currentQuestion.complete || currentQuestion.skipped)) {
+      let liveStudentHistoryCopy = deepCopy(this.props.liveStudentHistory);
+      const indexOfQ = liveStudentHistoryCopy.findIndex((question) => {
+        return question.qNum === qNumber;
+      });
+      liveStudentHistoryCopy.splice(indexOfQ, 1); // remove q from history if not complete
+      let studentHistoryCopy = deepCopy(this.props.studentHistory);
+      studentHistoryCopy[
+        this.props.liveCourse.courseCode
+      ] = liveStudentHistoryCopy;
+      console.log("about to dispatch UPDATE-STUDENT-HISTORY");
+      this.props.dispatch({
+        type: "UPDATE-STUDENT-HISTORY",
+        payload: {
+          liveStudentHistory: liveStudentHistoryCopy,
+          studentHistory: studentHistoryCopy,
+          currentQuestion: currentQuestion, // keep the same. will overwrite if going to Settings
+        },
+      });
+      console.log("ok");
+    }
+  };
+
+  handleOptionChange = (changeEvent) => {
     console.log("option " + changeEvent.target.value);
     let currentQuestion = this.props.currentQuestion;
     if (!currentQuestion.complete && !currentQuestion.skipped) {
       console.log("changing state selectedOption " + changeEvent.target.value);
       this.setState({
-        selectedOption: changeEvent.target.value
+        selectedOption: changeEvent.target.value,
       });
     } else {
       console.log(
         "not changing " + currentQuestion.complete + currentQuestion.skipped
       );
       this.setState({
-        selectedOption: undefined
+        selectedOption: undefined,
       });
     }
   };
 
-  commonUpdateSubmit = currentQuestionUpdate => {
+  commonUpdateSubmit = (currentQuestionUpdate) => {
     //
     const courseCode = this.props.currentQuestion.courseCode;
     let liveStudentHistoryCopy = deepCopy(this.props.liveStudentHistory);
-    const currentQuestionIndex = liveStudentHistoryCopy.findIndex(question => {
-      console.log(question.qNum);
-      console.log(this.props.currentQuestion.qNum);
-      console.log(question.qNum === this.props.currentQuestion.qNum);
-      return question.qNum === this.props.currentQuestion.qNum;
-    });
+    const currentQuestionIndex = liveStudentHistoryCopy.findIndex(
+      (question) => {
+        console.log(question.qNum);
+        console.log(this.props.currentQuestion.qNum);
+        console.log(question.qNum === this.props.currentQuestion.qNum);
+        return question.qNum === this.props.currentQuestion.qNum;
+      }
+    );
     console.log("currentQuestionIndex: " + currentQuestionIndex);
     console.log("step 4");
     console.log(courseCode);
@@ -92,7 +121,7 @@ class Template002 extends Component {
       data.append("currentQuestion", JSON.stringify(currentQuestionUpdate));
       let response = await fetch("/update-student-history", {
         method: "POST",
-        body: data
+        body: data,
       });
       let body = await response.text();
       let parsed = JSON.parse(body);
@@ -112,12 +141,12 @@ class Template002 extends Component {
         studentHistory: studentHistoryCopy,
         currentQuestion: currentQuestionUpdate,
         subscribedAllResponses: subscribedAllResponsesCopy,
-        liveAllResponses: liveAllResponsesCopy
-      }
+        liveAllResponses: liveAllResponsesCopy,
+      },
     });
   };
 
-  submitHandler = formSubmitEvent => {
+  submitHandler = (formSubmitEvent) => {
     formSubmitEvent.preventDefault();
     console.log("answer submitted");
     console.log(
@@ -140,10 +169,10 @@ class Template002 extends Component {
     this.commonUpdateSubmit(currentQuestionUpdate);
   };
 
-  skipQuestion = formSubmitEvent => {
+  skipQuestion = (formSubmitEvent) => {
     formSubmitEvent.preventDefault();
     this.setState({
-      selectedOption: undefined
+      selectedOption: undefined,
     });
     console.log("answer skipped");
     let currentQuestionUpdate = deepCopy(this.currentQuestionStart);
@@ -155,10 +184,10 @@ class Template002 extends Component {
     this.commonUpdateSubmit(currentQuestionUpdate);
   };
 
-  unSkipQuestion = formSubmitEvent => {
+  unSkipQuestion = (formSubmitEvent) => {
     formSubmitEvent.preventDefault();
     this.setState({
-      selectedOption: undefined
+      selectedOption: undefined,
     });
     console.log("answer UNskipped");
     let currentQuestionUpdate = deepCopy(this.currentQuestionStart);
@@ -171,7 +200,7 @@ class Template002 extends Component {
 
     this.props.dispatch({
       type: "SET-TIMER-ON",
-      payload: { timerOn: true }
+      payload: { timerOn: true },
     });
   };
 
@@ -187,7 +216,7 @@ class Template002 extends Component {
       skipped,
       response_submitted,
       courseCode,
-      chapter
+      chapter,
     } = this.props.currentQuestion;
 
     return (
@@ -264,7 +293,7 @@ class Template002 extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     username: state.username,
     currentQuestion: state.currentQuestion,
@@ -272,10 +301,10 @@ const mapStateToProps = state => {
     elapsedTime: state.elapsedTime,
     studentHistory: state.studentHistory,
     liveStudentHistory: state.liveStudentHistory,
-    liveCourseQuestions: state.liveCourseQuestions,
+    liveCourse: state.liveCourse,
     liveAllResponses: state.liveAllResponses,
     subscribedAllResponses: state.subscribedAllResponses,
-    timerOn: state.timerOn
+    timerOn: state.timerOn,
   };
 };
 

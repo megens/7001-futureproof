@@ -6,6 +6,10 @@ class Logout extends Component {
     super(props);
   }
 
+  componentDidMount = () => {
+    this.confirmLogoutButton.focus();
+  };
+
   performLogout = async () => {
     console.log("performing logout");
     let data = new FormData();
@@ -29,8 +33,8 @@ class Logout extends Component {
       payload: {
         username: this.props.username,
         cart: this.props.cart,
-        studentHistory: this.props.studentHistory
-      }
+        studentHistory: this.props.studentHistory,
+      },
     });
     this.props.rD.history.push("/"); // push the User experience to a new path
   };
@@ -40,6 +44,9 @@ class Logout extends Component {
       <input
         type="button"
         value="Confirm Log Out?"
+        ref={(input) => {
+          this.confirmLogoutButton = input;
+        }}
         onClick={this.performLogout}
       />
     );
@@ -55,7 +62,7 @@ const mapStateToProps = (state, props) => {
     studentHistory: state.studentHistory,
     subscriptions: state.subscriptions,
     subscriptionSettings: state.subscriptionSettings,
-    subscribedCourses: state.subscribedCourses
+    subscribedCourses: state.subscribedCourses,
   };
 };
 

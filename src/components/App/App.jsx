@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import { Link, Route, BrowserRouter, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 //import LinkButton from "../Utilities/LinkButton.jsx";
-import TopBanner from "../TopBanner/TopBanner.jsx";
-import TopLeft from "../TopLeft/TopLeft.jsx";
 import BottomLeft from "../BottomLeft/BottomLeft.jsx";
 import Footer from "../Footer/Footer.jsx";
 import { RoutesAndPaths } from "../RoutesAndPaths/RoutesAndPaths.jsx";
@@ -16,10 +14,13 @@ class App extends Component {
   render = () => {
     return (
       <BrowserRouter>
+        {/*
         <div className="top-row">
           <TopLeft />
           <TopBanner />
         </div>
+        */}
+
         <div className="middle-row">
           <RoutesAndPaths />
         </div>
@@ -32,11 +33,11 @@ class App extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     loggedIn: state.loggedIn,
     username: state.username,
-    cart: state.cart
+    cart: state.cart,
   }; // THIS WILL CHANGE
 };
 
